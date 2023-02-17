@@ -2,4 +2,4 @@
 base = "project"
 command = "npx vite build"
 functions = "functions"
-publish = "project/dist"
+publish = "dist"
