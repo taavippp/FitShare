@@ -1,0 +1,3 @@
+# 17. veebruar
+## Ajakulu: 2h 30m
+Tutvusin lähemalt Typescript'iga, üritasin Netlify funktsioonide jaoks kasutada enda loodud klasse. Sain hakkama. Õppisin natuke testimise kohta, aga näiteks taustateenuseid ma veel ei testinud, pole täiesti kindel ka, kuidas seda korrektselt teha. Tegin ajakavaga algust, kuid asju nii palju ette mõelda on keeruline. Targem kõlab paar nädalat korraga planeerida, sest arvatavasti asjaolud pidevalt muutuvad (eelmise veebiprojektiga ma tegin vahepeal väga palju asju korraga, vahepeal terve nädal ei teinud midagi).

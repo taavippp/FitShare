@@ -1,24 +1,20 @@
 <script setup lang="ts">
 import { Ref, ref } from "vue"
 import axios, { AxiosResponse } from "axios"
+import { AppResponse } from "@/../../classes/AppResponse"
 
 defineProps<{ msg: string }>()
-
-type FunctionJSON = {
-  message: string
-}
 
 const count: Ref<number> = ref(0)
 const message: Ref<string> = ref("Click me!")
 
 async function getData() {
-  const res: AxiosResponse = await axios.get("/.netlify/functions/hello")
-  while (res.status == 100) {
-    message.value = "Loading.."
-    console.log("loading")
-  }
-  const json: FunctionJSON = res.data
-  message.value = json.message
+  message.value = "Loading.."
+  setTimeout(async () => {
+    const res: AxiosResponse = await axios.get("/.netlify/functions/hello")
+    const json: AppResponse = res.data
+    message.value = json.message
+  }, 1000)
 }
 </script>
 
