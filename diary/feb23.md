@@ -1,0 +1,3 @@
+# 23. veebruar
+## Ajakulu: 4h
+Mõtlesin täna sellele, kuidas taustateenused oleks üles ehitatud ja mis päringuid tarvis oleks. Eelmisel projektil tekkis sellega probleeme, saime liiga hilja aru, mis juurde vaja kiiresti teha. Lisaks olen väga palju sellele mõelnud, kuidas andmed võiks andmebaasis olla. Mahukas oleks postituse stringis esindada harjutust tema nimega, seega sooviks kasutada ID-sid, aga need toovad oma probleemid. Küll aga tunnen, et vaikselt jõuan mingi vastuseni, mis mind rahuldab. Tunnen end juba TypeScript'iga ka palju mugavamalt ja enesekindlamalt.

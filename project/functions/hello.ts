@@ -9,8 +9,7 @@ import User from "../classes/User";
 
 export async function handler(event: HandlerEvent): Promise<AppResponse> {
 	console.log(event.httpMethod);
-	const db: Db = await AppDatabase.connect();
-	const collection: Collection<User> = db.collection<User>("user");
+	const collection: Collection<User> = await AppDatabase.collection("user");
 	const user: WithId<User> | null = await collection.findOne();
 	if (user !== null) {
 		console.log(user.username);
