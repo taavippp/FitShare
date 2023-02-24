@@ -1,10 +1,10 @@
 export default class Exercise {
-	id: number;
+	ID: number;
 	name: string;
 	categoryID: number;
 
-	constructor(id: number, name: string, categoryID: number) {
-		this.id = id;
+	constructor(ID: number, name: string, categoryID: number) {
+		this.ID = ID;
 		this.name = name;
 		this.categoryID = categoryID;
 	}

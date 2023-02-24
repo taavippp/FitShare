@@ -1,8 +1,8 @@
 import { HandlerEvent } from "@netlify/functions";
 import { AppResponse, AppResponseBody } from "@/../../classes/AppResponse";
-import { AppDatabase } from "./AppDatabase";
-import { Collection, Db, WithId } from "mongodb";
-import User from "../classes/User";
+import AppDatabase from "../classes/AppDatabase";
+import { Collection, WithId } from "mongodb";
+import User from "../classes/model/User";
 
 // If everything is set up correctly, this function should be accessible from
 // http://localhost:8888/api/hello
