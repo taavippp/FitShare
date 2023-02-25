@@ -11,3 +11,10 @@
 - Esilehe võiks teha või vähemalt algelise versiooni.
 - Konto registreerimise, sisselogimise süsteem.
 - Logo.
+## 6. - 12. märts
+- Lähem tutvumine Vue'ga.
+- Administraatori lehed ja süsteemid.
+- Postituse loomise leht ja süsteem.
+## 13. - 19. märts
+- Postituste näitamise ja otsingu leht.
+- Treeningu läbiviimise lehe loomine.

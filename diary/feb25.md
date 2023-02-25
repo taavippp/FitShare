@@ -1,0 +1,4 @@
+# 25. veebruar
+## Ajakulu: 3h 30m
+Täna kirjutasin teste eile tehtule (kasutajaga seotud teenused). Sellest oli kasu, sest sattusin paljude probleemide otsa. Näiteks Bcrypt'i moodul ei töötanud, kui teda kasutada nii, kuidas enamustes näidetes. Miskipärast peab teda kasutama asünkroonselt. Igatahes, sain hakkama ja tundub, et kõik eri võimalused said testitud. Õppisin natuke Regex'it ja kuidas teda Javascriptis kasutada, [see lehekülg](https://regex101.com/) on päris tore selleks otstarbeks.
+Figma lehele kahjuks ei jõudnud. Mul vahest lähebki niimoodi, et alustan ühe asjaga ei saa pidama ja siis teist ei saa alustatud.
