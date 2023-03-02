@@ -1,0 +1,3 @@
+# 1. märts
+## Ajakulu: 1h
+Täna tegelesin logo tegemisega. Kogusin algul mõtteid ja otsustasin, et kuna nimi on FitShare, siis oleks sobiv logo selline, kus oleks keskel hantel ja selle ümber nooled, mis tähistavad seda teistega oma teadmiste jagamise osa. Algul üritasin Gimpi programmis seda luua, aga otsustasin LibreSprite kasuks, sest olen palju rohkem selle programmiga harjunud. Tegin kohe ka .ico versiooni, sest seda formaati kasutatakse veebisaitide ikoonide jaoks.
