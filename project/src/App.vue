@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+  import NavBar from './components/NavBar.vue';
 </script>
 
 <template>
-  <HelloWorld msg="Vite + Vue" />
+  <NavBar/>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&family=Oxygen:wght@700&display=swap');
+
+body {
+  background-color: white;
+  margin: 0;
+  padding: 0;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+:root {
+  --color_logo: #2222bb;
+  --color_text_1: #222;
+  --color_text_2: #333;
+  --color_border: #3333cc;
+  --color_button: white;
+  --color_button_hover: #eee;
+  --font_logo: 'Fjalla One', sans-serif;
+  --font_large: 'Oxygen', sans-serif;
 }
 </style>
