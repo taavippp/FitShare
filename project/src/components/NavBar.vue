@@ -1,17 +1,22 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+    import { RouterLink } from 'vue-router';
+    import { routes } from '../router';
+
+    console.log(routes.browse.path)
+</script>
 
 <template>
     <nav class="mainNav">
         <span class="left">
             <img src="../assets/logo-96.png" alt="FitShare logo">
-            <a href="/">
-                <h1>FitShare</h1>
-            </a>
+                <RouterLink :to="routes.home.path">
+                    <h1>FitShare</h1>
+                </RouterLink>
         </span>
         <span class="right">
-            <a href="/train"><button>Train</button></a>
-            <a href="/browse"><button>Browse</button></a>
-            <a href="/account"><button>Account</button></a>
+            <RouterLink :to="routes.train.path"><button>Train</button></RouterLink>
+            <RouterLink :to="routes.browse.path"><button>Browse</button></RouterLink>
+            <RouterLink :to="routes.account.path"><button>Account</button></RouterLink>
         </span>
     </nav>
 </template>
@@ -23,7 +28,7 @@
         position: fixed;
         top: 0;
         width: 100vw;
-        height: 6rem;
+        height: 5rem;
 
         overflow: hidden;
         border-bottom: 2px solid var(--color_border);
@@ -45,10 +50,10 @@
 
     img {
         image-rendering: initial;
-        object-fit: contain;
+        width: 5rem;
+        height: 5rem;
 
-        height: min-content;
-        padding: 0 1em;
+        padding: 0 1rem;
     }
 
     a {
@@ -61,10 +66,10 @@
 
         cursor: pointer;
         
-        height: 6rem;
+        height: 5rem;
         padding: 0 1rem;
         
-        font-size: 3rem;
+        font-size: 2.5rem;
         background-color: var(--color_button);
         font-family: var(--font_large);
         color: var(--color_text_2)
@@ -78,7 +83,7 @@
         margin: 0;
 
         font-family: var(--font_logo);
-        font-size: 4em;
+        font-size: 4rem;
         color: var(--color_logo)
     }
 </style>

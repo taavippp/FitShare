@@ -1,9 +1,13 @@
 <script setup lang="ts">
   import NavBar from './components/NavBar.vue';
+  import { RouterView } from "vue-router"
 </script>
 
 <template>
   <NavBar/>
+  <div class="routerView">
+    <RouterView/>
+  </div>
 </template>
 
 <style>
@@ -24,5 +28,9 @@ body {
   --color_button_hover: #eee;
   --font_logo: 'Fjalla One', sans-serif;
   --font_large: 'Oxygen', sans-serif;
+}
+
+.routerView {
+  margin-top: 5rem;
 }
 </style>

@@ -15,7 +15,8 @@
 		"bcrypt": "^5.1.0",
 		"jsonwebtoken": "^9.0.0",
 		"mongodb": "^5.0.1",
-		"vue": "^3.2.45"
+		"vue": "^3.2.45",
+		"vue-router": "^4.1.6"
 	},
 	"devDependencies": {
 		"@netlify/functions": "^1.4.0",
