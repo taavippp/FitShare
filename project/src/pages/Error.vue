@@ -3,6 +3,8 @@
 </template>
 <style scoped>
     h3 {
+        width: 100vw;
+        text-align: center;
         font-size: 2.5rem;
         font-family: var(--font_large);
     }

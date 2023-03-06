@@ -1,4 +1,4 @@
-import { HandlerEvent } from "@netlify/functions";
+import { HandlerContext, HandlerEvent } from "@netlify/functions";
 import { AppResponse, AppResponseBody } from "@/../../classes/AppResponse";
 import AppDatabase from "../classes/AppDatabase";
 import { Collection } from "mongodb";
@@ -14,8 +14,10 @@ interface BodyUser {
 const usernameRegex: RegExp = /^[a-zA-Z]\w{2,14}$/;
 const passwordRegex: RegExp = /^.{8,}$/;
 
-// password check failed?
-export async function handler(event: HandlerEvent): Promise<AppResponse> {
+export async function handler(
+	event: HandlerEvent,
+	_context: HandlerContext
+): Promise<AppResponse> {
 	if (!event.body) {
 		return new AppResponse(
 			400,
@@ -58,76 +60,91 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 		);
 	}
 
-	if (event.httpMethod === "GET") {
-		const collection: Collection<User> = await AppDatabase.collection(
-			"user"
-		);
-		const user: User | null = await collection.findOne({
-			username: body.username,
-		});
-
-		if (!user) {
+	if (event.httpMethod === "POST") {
+		const isLogin: string | undefined = event.headers["x-login"];
+		if (
+			isLogin === undefined ||
+			(isLogin !== "true" && isLogin !== "false")
+		) {
 			return new AppResponse(
 				400,
-				new AppResponseBody("No user with that username exists", true)
+				new AppResponseBody("Request is missing X-Login header", true)
 			);
 		}
-
-		try {
-			const match: boolean = await bcrypt.compare(
-				body.password,
-				user.password
+		if (isLogin === "true") {
+			const collection: Collection<User> = await AppDatabase.collection(
+				"user"
 			);
-			if (!match) {
+			const user: User | null = await collection.findOne({
+				username: body.username,
+			});
+
+			if (!user) {
 				return new AppResponse(
 					400,
-					new AppResponseBody("Wrong password", true)
+					new AppResponseBody(
+						"No user with that username exists",
+						true
+					)
 				);
 			}
-		} catch (error) {
+
+			try {
+				const match: boolean = await bcrypt.compare(
+					body.password,
+					user.password
+				);
+				if (!match) {
+					return new AppResponse(
+						400,
+						new AppResponseBody("Wrong password", true)
+					);
+				}
+			} catch (error) {
+				return new AppResponse(
+					500,
+					new AppResponseBody(`Unexpected error: ${error}`, true)
+				);
+			}
+
+			const token: string = jwt.sign(
+				{ username: user.username },
+				process.env.JWT_SECRET
+			);
 			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
+				200,
+				new AppResponseBody("Logged in", false, { token })
+			);
+		} else {
+			const collection: Collection<User> = await AppDatabase.collection(
+				"user"
+			);
+			const user: User | null = await collection.findOne({
+				username: body.username,
+			});
+
+			if (user) {
+				return new AppResponse(
+					400,
+					new AppResponseBody("User already exists", true)
+				);
+			}
+
+			try {
+				const hash: string = await bcrypt.hash(body.password, 10);
+				collection.insertOne(new User(body.username, hash));
+			} catch (error) {
+				return new AppResponse(
+					500,
+					new AppResponseBody(`Unexpected error: ${error}`, true)
+				);
+			}
+
+			return new AppResponse(
+				200,
+				new AppResponseBody(`User ${body.username} registered`)
 			);
 		}
-
-		const token: string = jwt.sign(
-			{ username: user.username },
-			process.env.JWT_SECRET
-		);
-		return new AppResponse(
-			200,
-			new AppResponseBody("Logged in", false, { token })
-		);
-	} else if (event.httpMethod === "POST") {
-		const collection: Collection<User> = await AppDatabase.collection(
-			"user"
-		);
-		const user: User | null = await collection.findOne({
-			username: body.username,
-		});
-
-		if (user) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("User already exists", true)
-			);
-		}
-
-		try {
-			const hash: string = await bcrypt.hash(body.password, 10);
-			collection.insertOne(new User(body.username, hash));
-		} catch (error) {
-			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
-			);
-		}
-
-		return new AppResponse(
-			200,
-			new AppResponseBody(`User ${body.username} registered`)
-		);
 	} else if (event.httpMethod === "DELETE") {
 		const token: string | undefined = event.headers["authorization"];
 		if (token === undefined) {

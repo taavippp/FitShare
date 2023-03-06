@@ -1,8 +1,6 @@
 <script setup lang="ts">
     import { RouterLink } from 'vue-router';
     import { routes } from '../router';
-
-    console.log(routes.browse.path)
 </script>
 
 <template>
@@ -70,13 +68,12 @@
         padding: 0 1rem;
         
         font-size: 2.5rem;
-        background-color: var(--color_button);
+        background-color: var(--color_nav_button);
         font-family: var(--font_large);
-        color: var(--color_text_2)
     }
 
     button:hover {
-        background-color: var(--color_button_hover);
+        background-color: var(--color_nav_button_hover);
     }
 
     h1 {

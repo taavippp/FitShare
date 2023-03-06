@@ -25,12 +25,18 @@ export class AppResponse implements HandlerResponse {
 	}
 }
 
+type AppResponseBodyObject = { [property: string]: unknown } | undefined;
+
 export class AppResponseBody {
 	message: string;
 	error: boolean = false;
-	object?: object | undefined;
+	object?: AppResponseBodyObject;
 
-	constructor(message: string, error?: boolean, object?: object) {
+	constructor(
+		message: string,
+		error?: boolean,
+		object?: AppResponseBodyObject
+	) {
 		this.message = message;
 		if (error !== undefined) {
 			this.error = error;

@@ -7,7 +7,8 @@ import {
 } from "vue-router";
 
 import Home from "./pages/Home.vue";
-import ErrorPage from "./pages/ErrorPage.vue";
+import ErrorPage from "./pages/Error.vue";
+import Account from "./pages/Account.vue";
 
 export const routes: { [route: string]: RouteRecordRaw } = {
 	home: {
@@ -24,6 +25,10 @@ export const routes: { [route: string]: RouteRecordRaw } = {
 	},
 	account: {
 		path: "/account",
+		component: Account,
+	},
+	error: {
+		path: "/*",
 		component: ErrorPage,
 	},
 };

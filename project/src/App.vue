@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import NavBar from './components/NavBar.vue';
-  import { RouterView } from "vue-router"
+    import NavBar from './components/NavBar.vue';
+    import { RouterView } from "vue-router"
 </script>
 
 <template>
@@ -11,7 +11,7 @@
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&family=Oxygen:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&family=Oxygen:wght@700&family=Tajawal&display=swap');
 
 body {
   background-color: white;
@@ -21,13 +21,14 @@ body {
 
 :root {
   --color_logo: #2222bb;
-  --color_text_1: #222;
-  --color_text_2: #333;
   --color_border: #3333cc;
-  --color_button: white;
-  --color_button_hover: #eee;
+  --color_nav_button: white;
+  --color_nav_button_hover: #eee;
+  --color_button: #eee;
+  --color_button_hover: #ddd;
   --font_logo: 'Fjalla One', sans-serif;
   --font_large: 'Oxygen', sans-serif;
+  --font: 'Tajawal', sans-serif;
 }
 
 .routerView {

@@ -1,0 +1,5 @@
+# 5. märts
+## Ajakulu: 5h
+Täna tegelesin konto lehe loomisega. Algul ei osanud ma õigesti disaini luua, kuid mingi hetk sain sellega hakkama. Siis ei osanud ma Vue koodi õigesti kirjutada, aga vaikselt sain ka sellega hakkama. Siis tuli päringute tegemine. Tuleb välja, et GET päringuga ei tohi kaasa saata andmeid samamoodi nagu nt POST päringuga, kuigi Axios seda lubab ja sain ka kõik testid Postmanis nii tehtud. Seega pidin asju ümber tegema, niimoodi et nii sisselogimine kui ka registreerimine on mõlemad POST meetodiga kättesaadavad, kuid nüüd peab päringus olema "X-Login" päis, mis täpsustab, kas päringu eesmärk on sisse logida või registreeruda. Vastavalt kirjutasin ka testid ümber. Väga vaevaline...
+
+Otsisin ka enda arust väga kena fondi, jäin kasutajalehega lõpuks tegelikult väga rahule ning kuigi olen väsinud, tunnen, et olen palju tänasest õppinud.
