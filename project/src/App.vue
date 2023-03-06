@@ -26,6 +26,7 @@ body {
   --color_nav_button_hover: #eee;
   --color_button: #eee;
   --color_button_hover: #ddd;
+  --color_logged_in: #33aa33;
   --font_logo: 'Fjalla One', sans-serif;
   --font_large: 'Oxygen', sans-serif;
   --font: 'Tajawal', sans-serif;
@@ -33,5 +34,36 @@ body {
 
 .routerView {
   margin-top: 5rem;
+}
+
+h2, h3 {
+  font-family: var(--font_large);
+}
+
+h2 {
+  font-size: 3.5rem;
+}
+
+h3 {
+  font-size: 2.5rem;
+}
+
+label, input, button {
+  font-size: 1.5rem;
+  font-family: var(--font);
+}
+
+button {
+  background-color: var(--color_button);
+  border: 2px solid var(--color_button);
+  border-radius: 5px;
+}
+
+button:hover {
+  border: 2px solid var(--color_border);
+}
+
+button:active {
+  background-color: var(--color_button_hover);
 }
 </style>

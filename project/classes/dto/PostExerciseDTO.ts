@@ -1,5 +1,5 @@
-import Exercise from "./model/Exercise";
-import PostExercise from "./model/PostExercise";
+import Exercise from "../model/Exercise";
+import PostExercise from "../model/PostExercise";
 
 // ID sets reps intensity(optional)
 export default class PostExerciseDTO {

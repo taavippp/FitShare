@@ -27,6 +27,10 @@ export const routes: { [route: string]: RouteRecordRaw } = {
 		path: "/account",
 		component: Account,
 	},
+	create: {
+		path: "/create",
+		component: ErrorPage,
+	},
 	error: {
 		path: "/*",
 		component: ErrorPage,

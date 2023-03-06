@@ -5,18 +5,6 @@
     </div>
 </template>
 <style scoped>
-    h2, h3 {
-        font-family: var(--font_large);
-    }
-    
-    h2 {
-        font-size: 3.5rem;
-    }
-
-    h3 {
-        font-size: 2.5rem;
-    }
-
     .bigText {
         width: 100vw;
         text-align: center;

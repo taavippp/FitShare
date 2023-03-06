@@ -1,25 +1,33 @@
 <script setup lang="ts">
     import { RouterLink } from 'vue-router';
     import { routes } from '../router';
+    
+    const username: string | null = sessionStorage.getItem("username")
+    const loggedIn: boolean = username !== null
 </script>
-
 <template>
     <nav class="mainNav">
         <span class="left">
-            <img src="../assets/logo-96.png" alt="FitShare logo">
-                <RouterLink :to="routes.home.path">
-                    <h1>FitShare</h1>
-                </RouterLink>
+            <RouterLink :to="routes.home.path">
+                <img src="../assets/logo-96.png" alt="FitShare logo">
+            </RouterLink>
+            <h1>FitShare</h1>
         </span>
         <span class="right">
+            <RouterLink v-if="loggedIn" :to="routes.create.path"><button>+</button></RouterLink>
             <RouterLink :to="routes.train.path"><button>Train</button></RouterLink>
             <RouterLink :to="routes.browse.path"><button>Browse</button></RouterLink>
-            <RouterLink :to="routes.account.path"><button>Account</button></RouterLink>
+            <RouterLink :to="routes.account.path"><button class="Account" :class="loggedIn ? `LoggedIn` : ``">{{ username ?? "Account" }}</button></RouterLink>
         </span>
     </nav>
 </template>
-
 <style scoped>
+    @media only screen and (max-width: 940px) {
+        h1 {
+            display: none;
+        }
+    }
+
     nav.mainNav {
         display: flex;
 
@@ -58,9 +66,10 @@
         text-decoration: none;
     }
 
-    button {
+    nav span button {
         border: none;
         border-left: 2px solid var(--color_border);
+        border-radius: 0;
 
         cursor: pointer;
         
@@ -72,8 +81,12 @@
         font-family: var(--font_large);
     }
 
-    button:hover {
+    nav span button:hover {
         background-color: var(--color_nav_button_hover);
+    }
+
+    .Account.LoggedIn {
+        font-size: 2.5vw;
     }
 
     h1 {

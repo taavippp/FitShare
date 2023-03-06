@@ -5,18 +5,16 @@ import { Collection } from "mongodb";
 import User from "../classes/model/User";
 import bcrypt from "bcrypt";
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
+import UserDTO from "../classes/dto/UserDTO";
 
 interface BodyUser {
 	username: string | unknown | undefined;
 	password: string | unknown | undefined;
 }
 
-const usernameRegex: RegExp = /^[a-zA-Z]\w{2,14}$/;
-const passwordRegex: RegExp = /^.{8,}$/;
-
 export async function handler(
 	event: HandlerEvent,
-	_context: HandlerContext
+	context: HandlerContext
 ): Promise<AppResponse> {
 	if (!event.body) {
 		return new AppResponse(
@@ -43,20 +41,15 @@ export async function handler(
 		);
 	}
 
-	if (!usernameRegex.test(body.username)) {
+	const reqUser: User | null = UserDTO.create(body.username, body.password);
+
+	if (reqUser === null) {
 		return new AppResponse(
 			400,
 			new AppResponseBody(
-				"Username must consist of 3-15 characters and can only include A-Z, numbers and _",
+				"Username must be 3-15 symbols (A-Z, a-z, 0-9, _) and password must be at least 8 symbols",
 				true
 			)
-		);
-	}
-
-	if (!passwordRegex.test(body.password)) {
-		return new AppResponse(
-			400,
-			new AppResponseBody("Password must be at least 8 characters", true)
 		);
 	}
 
@@ -75,11 +68,11 @@ export async function handler(
 			const collection: Collection<User> = await AppDatabase.collection(
 				"user"
 			);
-			const user: User | null = await collection.findOne({
-				username: body.username,
+			const dbUser: User | null = await collection.findOne({
+				username: reqUser.username,
 			});
 
-			if (!user) {
+			if (!dbUser) {
 				return new AppResponse(
 					400,
 					new AppResponseBody(
@@ -91,8 +84,8 @@ export async function handler(
 
 			try {
 				const match: boolean = await bcrypt.compare(
-					body.password,
-					user.password
+					reqUser.password,
+					dbUser.password
 				);
 				if (!match) {
 					return new AppResponse(
@@ -108,7 +101,7 @@ export async function handler(
 			}
 
 			const token: string = jwt.sign(
-				{ username: user.username },
+				{ username: dbUser.username },
 				process.env.JWT_SECRET
 			);
 			return new AppResponse(
@@ -119,11 +112,11 @@ export async function handler(
 			const collection: Collection<User> = await AppDatabase.collection(
 				"user"
 			);
-			const user: User | null = await collection.findOne({
-				username: body.username,
+			const dbUser: User | null = await collection.findOne({
+				username: reqUser.username,
 			});
 
-			if (user) {
+			if (dbUser) {
 				return new AppResponse(
 					400,
 					new AppResponseBody("User already exists", true)
@@ -131,8 +124,8 @@ export async function handler(
 			}
 
 			try {
-				const hash: string = await bcrypt.hash(body.password, 10);
-				collection.insertOne(new User(body.username, hash));
+				reqUser.password = await bcrypt.hash(reqUser.password, 10);
+				collection.insertOne(reqUser);
 			} catch (error) {
 				return new AppResponse(
 					500,
@@ -142,7 +135,7 @@ export async function handler(
 
 			return new AppResponse(
 				200,
-				new AppResponseBody(`User ${body.username} registered`)
+				new AppResponseBody(`User ${reqUser.username} registered`)
 			);
 		}
 	} else if (event.httpMethod === "DELETE") {
@@ -159,7 +152,7 @@ export async function handler(
 				token,
 				process.env.JWT_SECRET
 			);
-			if (body.username !== payload["username"]) {
+			if (reqUser.username !== payload["username"]) {
 				return new AppResponse(
 					400,
 					new AppResponseBody("Invalid token", true)
@@ -184,11 +177,11 @@ export async function handler(
 		const collection: Collection<User> = await AppDatabase.collection(
 			"user"
 		);
-		const user: User | null = await collection.findOne({
-			username: body.username,
+		const dbUser: User | null = await collection.findOne({
+			username: reqUser.username,
 		});
 
-		if (!user) {
+		if (!dbUser) {
 			return new AppResponse(
 				400,
 				new AppResponseBody("User doesn't exist", true)
@@ -197,8 +190,8 @@ export async function handler(
 
 		try {
 			const match: boolean = await bcrypt.compare(
-				body.password,
-				user.password
+				reqUser.password,
+				dbUser.password
 			);
 			if (!match) {
 				return new AppResponse(
@@ -213,10 +206,10 @@ export async function handler(
 			);
 		}
 
-		collection.deleteOne({ username: body.username });
+		collection.deleteOne({ username: reqUser.username });
 		return new AppResponse(
 			200,
-			new AppResponseBody(`User ${body.username} deleted`)
+			new AppResponseBody(`User ${reqUser.username} deleted`)
 		);
 	} else {
 		return new AppResponse(

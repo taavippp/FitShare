@@ -1,0 +1,3 @@
+# 6. märts
+## Ajakulu: 3h 45m
+Täna tegin laadimisanimatsiooni ja nüüd kasutaja poolel on ka andmete RegEx kontroll. Paar tundi hiljem kirjutasin ka testid sellele klassile, mis neid andmeid nüüd kontrollib ja mujalt võtsin need testid ja funktsionaalsused ära, mis varem seda ülesannet täitsid. Tegin ka kontolehe veidi ümber, et sisselogimise vorm on eraldi failis, et kontolehel saaks ka profiil sisselogides olla. Välja saab ka logida, aga konto kustutamise funktsionaalsust ma veel ei teinud. Lisaks tegin natuke CSS'i ümber, et ei peaks sama koodi korrutama. Üritasin mobiiliekraanide jaoks ka natuke navigatsiooniriba muuta, aga ma pole selles väga enesekindel.
