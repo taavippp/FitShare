@@ -1,0 +1,3 @@
+# 8. märts
+## Ajakulu: 3h 30m
+Täna otsustasin lõpuks, mis kujul treeningharjutused võiksid andmebaasis olla. Sellega seoses tõstsin asju ümber, lisasin, kustutasin jne. Lõin uue *backend* funktsiooni nimega *exercise*, nüüd saab administraator harjutusi andmebaasi lisada. Teste ei jõudnud veel kirjutada kogu sellele posule. Arvatavasti teen veel neid samu asju ümber, aga hetkel tundub vähemalt, et hakkab looma.

@@ -1,11 +1,12 @@
-export default class Exercise {
-	ID: number;
-	name: string;
-	categoryID: number;
+import CountedModel from "../CountedModel";
 
-	constructor(ID: number, name: string, categoryID: number) {
-		this.ID = ID;
+export default class Exercise implements CountedModel {
+	_id?: number;
+	name: string;
+	category: number;
+
+	constructor(name: string, category: number) {
 		this.name = name;
-		this.categoryID = categoryID;
+		this.category = category;
 	}
 }

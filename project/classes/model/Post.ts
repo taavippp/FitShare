@@ -1,18 +1,16 @@
 import { ObjectId } from "mongodb";
+import CountedModel from "../CountedModel";
 import PostExercise from "./PostExercise";
-import PostExerciseDTO from "../PostExerciseDTO";
 
-export default class Post {
-	ID: number;
+export default class Post implements CountedModel {
+	_id?: ObjectId;
+	title: string;
 	userID: ObjectId;
 	content: Array<PostExercise>;
 
-	constructor(ID: number, userID: ObjectId, content: string) {
-		this.ID = ID;
+	constructor(title: string, userID: ObjectId, content: Array<PostExercise>) {
+		this.title = title;
 		this.userID = userID;
-		const contentData: Array<string> = content.split(",");
-		this.content = contentData.map((value) => {
-			return PostExerciseDTO.deserialize(value);
-		});
+		this.content = content;
 	}
 }

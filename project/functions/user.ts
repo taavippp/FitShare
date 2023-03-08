@@ -1,7 +1,7 @@
-import { HandlerContext, HandlerEvent } from "@netlify/functions";
+import { HandlerEvent } from "@netlify/functions";
 import { AppResponse, AppResponseBody } from "@/../../classes/AppResponse";
 import AppDatabase from "../classes/AppDatabase";
-import { Collection } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import User from "../classes/model/User";
 import bcrypt from "bcrypt";
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
@@ -12,10 +12,7 @@ interface BodyUser {
 	password: string | unknown | undefined;
 }
 
-export async function handler(
-	event: HandlerEvent,
-	context: HandlerContext
-): Promise<AppResponse> {
+export async function handler(event: HandlerEvent): Promise<AppResponse> {
 	if (!event.body) {
 		return new AppResponse(
 			400,
@@ -100,10 +97,19 @@ export async function handler(
 				);
 			}
 
+			let id: ObjectId | undefined = undefined;
+			if (dbUser._id !== undefined) {
+				id = dbUser._id;
+			}
+
 			const token: string = jwt.sign(
-				{ username: dbUser.username },
+				{
+					username: dbUser.username,
+					id,
+				},
 				process.env.JWT_SECRET
 			);
+
 			return new AppResponse(
 				200,
 				new AppResponseBody("Logged in", false, { token })
@@ -152,7 +158,10 @@ export async function handler(
 				token,
 				process.env.JWT_SECRET
 			);
-			if (reqUser.username !== payload["username"]) {
+			if (
+				reqUser.username !== payload["username"] ||
+				!ObjectId.isValid(payload["id"])
+			) {
 				return new AppResponse(
 					400,
 					new AppResponseBody("Invalid token", true)

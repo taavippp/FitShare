@@ -14,10 +14,13 @@ export default class AppDatabase {
 	}
 
 	static async collection<Type extends Mongo.Document>(
-		name: "user" | "exercise" | "category" | "post" | "comment",
+		name: "user" | "exercise" | "post" | "comment",
+		db?: Mongo.Db | undefined,
 		dev: boolean = true
 	): Promise<Mongo.Collection<Type>> {
-		const db: Mongo.Db = await AppDatabase.connect(dev);
+		if (db === undefined) {
+			db = await AppDatabase.connect(dev);
+		}
 		return db.collection<Type>(name);
 	}
 }

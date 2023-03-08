@@ -43,7 +43,7 @@
             } else {
                 sessionStorage.setItem(
                     "token",
-                    String(data.object.token)
+                    data.object.token as string
                 )
                 sessionStorage.setItem(
                     "username",
@@ -63,7 +63,7 @@
             new AxiosHeaders({ "X-Login": "false" }))
         const data: AppResponseBody = res.data
         if (!data.error) {
-            setTimeout(setIsSigningIn, 2000);
+            setTimeout(setIsSigningIn, 1500);
         }
         feedback.value = `${data.message}!`
         loading.value = false

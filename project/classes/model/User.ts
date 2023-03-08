@@ -1,4 +1,8 @@
-export default class User {
+import CountedModel from "../CountedModel";
+import { ObjectId } from "mongodb";
+
+export default class User implements CountedModel {
+	_id?: ObjectId;
 	username: string;
 	password: string;
 

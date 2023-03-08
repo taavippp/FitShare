@@ -1,18 +1,16 @@
-import Exercise from "./Exercise";
-
 export default class PostExercise {
-	exercise: Exercise;
+	exerciseID: number;
 	sets: number;
 	repetitions: number;
 	intensity?: number;
 
 	constructor(
-		exercise: Exercise,
+		exerciseID: number,
 		sets: number,
 		repetitions: number,
 		intensity?: number
 	) {
-		this.exercise = exercise;
+		this.exerciseID = exerciseID;
 		this.sets = sets;
 		this.repetitions = repetitions;
 		if (intensity !== undefined) {

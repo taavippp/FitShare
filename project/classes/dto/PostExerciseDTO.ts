@@ -1,19 +1,20 @@
-import Exercise from "../model/Exercise";
 import PostExercise from "../model/PostExercise";
 
-// ID sets reps intensity(optional)
+// name sets reps intensity(optional)
 export default class PostExerciseDTO {
-	static serialize(pe: PostExercise): string {
-		const intensity: string =
-			pe.intensity === undefined ? `` : ` ${pe.intensity}`;
-		return `${pe.exercise.ID} ${pe.sets} ${pe.repetitions}${intensity}`;
+	static serialize(pe: PostExercise): Array<number> {
+		const arr: Array<number> = [pe.exerciseID, pe.sets, pe.repetitions];
+		if (pe.intensity !== undefined) {
+			arr.push(pe.intensity);
+		}
+		return arr;
 	}
 
-	static deserialize(pe: string): PostExercise {
-		return new PostExercise(
-			new Exercise(-1, "Not implemented", -1),
-			-1,
-			-1
-		);
+	static deserialize(arr: Array<number>): PostExercise {
+		const pe: PostExercise = new PostExercise(arr[0], arr[1], arr[2]);
+		if (arr.length === 4) {
+			pe.intensity = arr[3];
+		}
+		return pe;
 	}
 }
