@@ -1,24 +1,29 @@
 import { HandlerEvent } from "@netlify/functions";
-import { Collection, ObjectId } from "mongodb";
+import { Collection, Db, ObjectId } from "mongodb";
 import AppDatabase from "../classes/AppDatabase";
 import { AppResponse, AppResponseBody } from "../classes/AppResponse";
 import ExerciseCategory from "../classes/ExerciseCategory";
 import Exercise from "../classes/model/Exercise";
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
-import Admins from "../public/admins.json";
+import User from "../classes/model/User";
+import Admin from "../classes/model/Admin";
 
 const ExerciseCategoryKeys = Object.keys(ExerciseCategory);
 
 interface BodyExercise {
 	name?: string;
-	category?: typeof ExerciseCategory;
+	categories?: Array<number>;
 }
 
 export async function handler(event: HandlerEvent): Promise<AppResponse> {
 	if (event.httpMethod === "GET") {
 		const query = event.queryStringParameters;
 
-		if (query === null || query.categories === undefined) {
+		if (
+			query === null ||
+			query.categories === undefined ||
+			query.categories === ""
+		) {
 			return new AppResponse(
 				400,
 				new AppResponseBody("Missing query parameter", true)
@@ -38,8 +43,6 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 			}
 			categories.push(index);
 		}
-
-		console.log(categories);
 
 		const collection: Collection<Exercise> = await AppDatabase.collection(
 			"exercise"
@@ -73,7 +76,7 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 		}
 
 		const body: BodyExercise = JSON.parse(event.body);
-		if (body.name === undefined || body.category === undefined) {
+		if (body.name === undefined || body.categories === undefined) {
 			return new AppResponse(
 				400,
 				new AppResponseBody("Missing content in body", true)
@@ -82,11 +85,21 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 
 		if (
 			!(typeof body.name === "string") ||
-			!(typeof body.category === "number")
+			!(body.categories instanceof Array<number>)
 		) {
 			return new AppResponse(
 				400,
 				new AppResponseBody("Body content is wrong type", true)
+			);
+		}
+
+		if (
+			Math.max(...body.categories) >= ExerciseCategoryKeys.length ||
+			Math.min(...body.categories) < 0
+		) {
+			return new AppResponse(
+				400,
+				new AppResponseBody("Invalid exercise category", true)
 			);
 		}
 
@@ -103,10 +116,31 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 				token,
 				process.env.JWT_SECRET
 			);
-			if (
-				!Admins.includes(payload["username"]) ||
-				!ObjectId.isValid(payload["id"])
-			) {
+
+			const userCollection: Collection<User> =
+				await AppDatabase.collection("user");
+			const user: User | null = await userCollection.findOne({
+				username: payload["username"],
+			});
+
+			if (user === null) {
+				return new AppResponse(
+					400,
+					new AppResponseBody(
+						`User ${payload["username"]} doesn't exist`,
+						true
+					)
+				);
+			}
+
+			const db: Db = await AppDatabase.connect();
+			const adminCollection: Collection<Admin> =
+				await AppDatabase.collection("admin", db);
+			const admin: Admin | null = await adminCollection.findOne({
+				username: payload["username"],
+			});
+
+			if (admin === null || !ObjectId.isValid(payload["id"])) {
 				return new AppResponse(
 					400,
 					new AppResponseBody("Invalid token", true)
@@ -131,12 +165,14 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 		const collection: Collection<Exercise> = await AppDatabase.collection(
 			"exercise"
 		);
-		const exercise: Exercise = new Exercise(body.name, body.category);
+
+		const exercise: Exercise = new Exercise(body.name, body.categories);
 		exercise._id = await collection.countDocuments({});
 		await collection.insertOne(exercise);
+
 		return new AppResponse(
 			200,
-			new AppResponseBody(`Inserted ${exercise.name}`)
+			new AppResponseBody(`Inserted ${exercise.name}`, false)
 		);
 	} else {
 		return new AppResponse(

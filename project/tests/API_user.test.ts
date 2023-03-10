@@ -1,5 +1,5 @@
-import { describe, expect, test, TestOptions, vitest } from "vitest";
-import axios, { AxiosHeaders, AxiosResponse } from "axios";
+import { describe, expect, test, TestOptions } from "vitest";
+import { AxiosHeaders, AxiosResponse } from "axios";
 import User from "../classes/model/User";
 import { AppResponseBody } from "../classes/AppResponse";
 import AppRequest from "../classes/AppRequest";
@@ -39,10 +39,12 @@ describe("/api/user tests", async () => {
 				"Request is missing X-Login header"
 			);
 
-			res = await axios.put(url, new User("hello", "worldson"), {
-				validateStatus: () => true,
-				headers: new AxiosHeaders({ "X-Login": "true" }),
-			});
+			res = await AppRequest.request(
+				"PUT",
+				url,
+				new User("hello", "worldson"),
+				new AxiosHeaders({ "X-Login": "true" })
+			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
 			expect(data.message).toStrictEqual("Invalid HTTP method");
@@ -86,7 +88,7 @@ describe("/api/user tests", async () => {
 
 			// for later use
 			if (data.object !== undefined) {
-				token = String(data.object.token);
+				token = data.object.token as string;
 			}
 		},
 		options
@@ -131,7 +133,7 @@ describe("/api/user tests", async () => {
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Invalid token");
+			expect(data.message, token).toStrictEqual("Invalid token");
 
 			res = await AppRequest.delete(
 				url,

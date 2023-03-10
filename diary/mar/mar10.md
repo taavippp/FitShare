@@ -1,0 +1,5 @@
+# 10. märts
+## Ajakulu: 3h
+Täna kirjutasin uue treeningharjutusega seotud testid lõpuni. Algul üritasin testide ajal kasutaja "testuser" administraatoriks teha ja hiljem selle eemaldada nimekirjast, aga ei saanud lõpuks hakkama. Nüüd vaatan andmebaasist, kas "testadmin" on "admin" kollektsioonis/tabelis. Tegin selleks ka eraldi taustafunktsiooni "is_admin", mille koodi ja teste oli päris lihtne kirjutada. Selle funktsiooni mõte on see, et kontolehelt oleks võimalik sisseloginud administraatoril navigeerida administraatori lehele, kust saab juba uusi harjutusi lisama hakata läbi *frontend*'i. Seega homme peaks olema aeg Vue koodi kirjutada.
+
+Olen ka tähele pannud, et palju taustafunktsioonide koodi kordub, aga pole kindel, kuidas seda lühemaks hetkel teha. Olen kaalunud AppResponseFactory loomist, millel on erinevad korduvad HTTP vastused olemas, aga siiski korduksid erinevad andmetüüpide kontrollid ja muu.

@@ -1,0 +1,3 @@
+# 9. märts
+## Ajakulu: 1h 30m
+Täna otsustasin, et ühel treeningharjutusel peaks olema võimalik mitu erinevat kategooriat olla, seega kirjutasin seda klassi natuke ümber ja vastavat *backend*'i funktsiooni ka. Seejärel hakkasin eile tehtule teste kirjutama, aga olen päris väsinud tänasest päevast, seega jätan praegu töö pooleli. Kui aus olla, ootan, millal saaksin uuesti Vue koodi kirjutada. Mulle väga meeldis eelmine nädal tehtu.

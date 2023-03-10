@@ -14,7 +14,7 @@ export default class AppDatabase {
 	}
 
 	static async collection<Type extends Mongo.Document>(
-		name: "user" | "exercise" | "post" | "comment",
+		name: "user" | "exercise" | "post" | "comment" | "admin",
 		db?: Mongo.Db | undefined,
 		dev: boolean = true
 	): Promise<Mongo.Collection<Type>> {

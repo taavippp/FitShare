@@ -3,10 +3,10 @@ import CountedModel from "../CountedModel";
 export default class Exercise implements CountedModel {
 	_id?: number;
 	name: string;
-	category: number;
+	categories: Array<number>;
 
-	constructor(name: string, category: number) {
+	constructor(name: string, categories: Array<number>) {
 		this.name = name;
-		this.category = category;
+		this.categories = categories;
 	}
 }

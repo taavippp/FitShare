@@ -3,6 +3,7 @@ import axios, { AxiosHeaders, AxiosResponse } from "axios";
 function validateStatus() {
 	return true;
 }
+const timeout: number = 7500;
 
 export default class AppRequest {
 	static get(
@@ -14,7 +15,7 @@ export default class AppRequest {
 			params,
 			validateStatus,
 			headers,
-			timeout: 10000,
+			timeout,
 		});
 	}
 
@@ -26,7 +27,7 @@ export default class AppRequest {
 		return axios.post(url, data, {
 			validateStatus,
 			headers,
-			timeout: 10000,
+			timeout,
 		});
 	}
 
@@ -39,7 +40,23 @@ export default class AppRequest {
 			data,
 			validateStatus,
 			headers,
-			timeout: 10000,
+			timeout,
+		});
+	}
+
+	static request(
+		method: string,
+		url: string,
+		data?: unknown,
+		headers?: AxiosHeaders
+	): Promise<AxiosResponse> {
+		return axios.request({
+			method,
+			url,
+			data,
+			headers,
+			validateStatus,
+			timeout,
 		});
 	}
 }
