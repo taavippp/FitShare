@@ -36,7 +36,7 @@ body {
   margin-top: 5rem;
 }
 
-h2, h3 {
+h2, h3, h4 {
   font-family: var(--font_large);
 }
 

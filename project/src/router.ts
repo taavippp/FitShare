@@ -6,14 +6,15 @@ import {
 	RouteRecordRaw,
 } from "vue-router";
 
-import Home from "./pages/Home.vue";
+import HomePage from "./pages/Home.vue";
 import ErrorPage from "./pages/Error.vue";
-import Account from "./pages/Account.vue";
+import AccountPage from "./pages/Account.vue";
+import AdminPage from "./pages/Admin.vue";
 
-export const routes: { [route: string]: RouteRecordRaw } = {
+export const routes: { [name: string]: RouteRecordRaw } = {
 	home: {
 		path: "/",
-		component: Home,
+		component: HomePage,
 	},
 	train: {
 		path: "/train",
@@ -25,11 +26,15 @@ export const routes: { [route: string]: RouteRecordRaw } = {
 	},
 	account: {
 		path: "/account",
-		component: Account,
+		component: AccountPage,
 	},
 	create: {
 		path: "/create",
 		component: ErrorPage,
+	},
+	admin: {
+		path: "/admin",
+		component: AdminPage,
 	},
 	error: {
 		path: "/*",
@@ -40,7 +45,15 @@ export const routes: { [route: string]: RouteRecordRaw } = {
 const history: RouterHistory = createWebHistory();
 const router: Router = createRouter({
 	history,
-	routes: [routes.home, routes.train, routes.browse, routes.account],
+	routes: [
+		routes.home,
+		routes.train,
+		routes.browse,
+		routes.account,
+		routes.create,
+		routes.admin,
+		routes.error,
+	],
 });
 
 export default router;

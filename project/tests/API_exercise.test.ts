@@ -86,6 +86,11 @@ describe("api/exercise tests", () => {
 			expect(data.error).toBeTruthy();
 			expect(data.message).toStrictEqual("Missing content in body");
 
+			res = await AppRequest.post(url, { name: "test", categories: [] });
+			data = res.data;
+			expect(data.error).toBeTruthy();
+			expect(data.message).toStrictEqual("Missing content in body");
+
 			res = await AppRequest.post(url, {
 				name: 0,
 				categories: "test",

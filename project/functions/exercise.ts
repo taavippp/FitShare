@@ -76,7 +76,11 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 		}
 
 		const body: BodyExercise = JSON.parse(event.body);
-		if (body.name === undefined || body.categories === undefined) {
+		if (
+			body.name === undefined ||
+			body.categories === undefined ||
+			body.categories.length < 1
+		) {
 			return new AppResponse(
 				400,
 				new AppResponseBody("Missing content in body", true)
@@ -94,7 +98,7 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 		}
 
 		if (
-			Math.max(...body.categories) >= ExerciseCategoryKeys.length ||
+			Math.max(...body.categories) > ExerciseCategoryKeys.length ||
 			Math.min(...body.categories) < 0
 		) {
 			return new AppResponse(

@@ -8,7 +8,7 @@
     import Loading from '../components/Loading.vue';
     import UserDTO from "../../classes/dto/UserDTO"
 
-    const url: string = "/api/user"
+    const URL: string = "/api/user"
     
     const isSigningIn: Ref<boolean> = ref(true)
     const username: Ref<string> = ref("")
@@ -34,7 +34,7 @@
 
         if (isSigningIn.value) {
             const res: AxiosResponse = await AppRequest.post(
-                url,
+                URL,
                 user,
                 new AxiosHeaders({ "X-Login": "true" }))
             const data: AppResponseBody = res.data
@@ -58,7 +58,7 @@
             return
         }
         const res: AxiosResponse = await AppRequest.post(
-            url,
+            URL,
             user,
             new AxiosHeaders({ "X-Login": "false" }))
         const data: AppResponseBody = res.data

@@ -14,7 +14,7 @@
             <h1>FitShare</h1>
         </span>
         <span class="right">
-            <RouterLink v-if="loggedIn" :to="routes.create.path"><button>+</button></RouterLink>
+            <RouterLink :to="routes.create.path"><button>+</button></RouterLink>
             <RouterLink :to="routes.train.path"><button>Train</button></RouterLink>
             <RouterLink :to="routes.browse.path"><button>Browse</button></RouterLink>
             <RouterLink :to="routes.account.path"><button class="Account" :class="loggedIn ? `LoggedIn` : ``">{{ username ?? "Account" }}</button></RouterLink>
@@ -38,6 +38,7 @@
 
         overflow: hidden;
         border-bottom: 2px solid var(--color_border);
+        background-color: white;
     }
 
     .left {
