@@ -6,17 +6,17 @@
     }>()
 </script>
 <template>
-    <div>
+    <div class="PictureContainer">
         <img :src="src" :alt="alt">
         <p>{{ text }}</p>
     </div>
 </template>
 <style scoped>
-div {
+div.PictureContainer {
     display: flex;
     align-items: center;
     border: 2px solid var(--color_border);
-    flex-direction: initial;
+    flex-direction: row;
     width: 50vw;
     margin-bottom: 1.5rem;
 }

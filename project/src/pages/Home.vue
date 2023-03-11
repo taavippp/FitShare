@@ -48,7 +48,7 @@
     }
 
     div.Footer {
-        width: 99vw;
+        width: 100%;
         font-family: var(--font);
         border-top: 2px solid var(--color_border);
         color: white;
