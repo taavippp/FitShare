@@ -1,82 +1,133 @@
+import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
+import DataValidator from "../classes/DataValidator";
 import { HandlerEvent } from "@netlify/functions";
-import { AppResponse, AppResponseBody } from "@/../../classes/AppResponse";
 import AppDatabase from "../classes/AppDatabase";
+import AppResponse from "../classes/AppResponse";
 import { Collection, ObjectId } from "mongodb";
+import TokenDTO from "../classes/dto/TokenDTO";
+import UserDTO from "../classes/dto/UserDTO";
+import { JwtPayload } from "jsonwebtoken";
 import User from "../classes/model/User";
 import bcrypt from "bcrypt";
-import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
-import UserDTO from "../classes/dto/UserDTO";
 
-interface BodyUser {
-	username: string | unknown | undefined;
-	password: string | unknown | undefined;
-}
+type BodyUser = Omit<User, "_id">;
 
-export async function handler(event: HandlerEvent): Promise<AppResponse> {
+export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	if (!event.body) {
-		return new AppResponse(
-			400,
-			new AppResponseBody("Request is missing body", true)
-		);
+		return AppResponse.InvalidBody;
 	}
 
 	const body: BodyUser = JSON.parse(event.body);
-	if (body.username === undefined || body.password === undefined) {
-		return new AppResponse(
-			400,
-			new AppResponseBody("Missing content in body", true)
-		);
-	}
-
 	if (
-		!(typeof body.username === "string") ||
-		!(typeof body.password === "string")
+		!DataValidator.isValid(body, {
+			username: "string",
+			password: "string",
+		})
 	) {
-		return new AppResponse(
-			400,
-			new AppResponseBody("Body content is wrong type", true)
-		);
+		return AppResponse.InvalidBody;
 	}
 
 	const reqUser: User | null = UserDTO.create(body.username, body.password);
 
-	if (reqUser === null) {
-		return new AppResponse(
-			400,
-			new AppResponseBody(
-				"Username must be 3-15 symbols (A-Z, a-z, 0-9, _) and password must be at least 8 symbols",
-				true
-			)
+	if (!reqUser) {
+		return AppResponse.BadRequest(
+			"Username must be 3-15 symbols (A-Z, a-z, 0-9, _) " +
+				"and password must be at least 8 symbols"
 		);
 	}
 
-	if (event.httpMethod === "POST") {
-		const isLogin: string | undefined = event.headers["x-login"];
-		if (
-			isLogin === undefined ||
-			(isLogin !== "true" && isLogin !== "false")
-		) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Request is missing X-Login header", true)
-			);
+	switch (event.httpMethod) {
+		case "POST": {
+			const isLogin: string | undefined = event.headers["x-login"];
+			if (!isLogin || (isLogin !== "true" && isLogin !== "false")) {
+				return AppResponse.BadRequest(
+					"Request is missing X-Login header"
+				);
+			}
+
+			if (isLogin === "true") {
+				const collection: Collection<User> =
+					await AppDatabase.collection("user");
+				const dbUser: Required<User> | null = await collection.findOne({
+					username: reqUser.username,
+				});
+
+				if (!dbUser) {
+					return AppResponse.BadRequest(
+						`No user with that username exists`
+					);
+				}
+
+				try {
+					const match: boolean = await bcrypt.compare(
+						reqUser.password,
+						dbUser.password
+					);
+					if (!match) {
+						return AppResponse.BadRequest("Wrong password");
+					}
+				} catch (error) {
+					return AppResponse.ServerError(error);
+				}
+
+				const token: string = TokenDTO.serialize({
+					username: reqUser.username,
+					id: dbUser._id,
+				});
+
+				return AppResponse.Success(
+					new BaseResponseBody("Logged in", false, { token })
+				);
+			} else {
+				const collection: Collection<User> =
+					await AppDatabase.collection("user");
+				const dbUser: User | null = await collection.findOne({
+					username: reqUser.username,
+				});
+
+				if (dbUser) {
+					return AppResponse.BadRequest("User already exists");
+				}
+
+				try {
+					reqUser.password = await bcrypt.hash(reqUser.password, 10);
+					collection.insertOne(reqUser);
+				} catch (error) {
+					return AppResponse.ServerError(error);
+				}
+
+				return AppResponse.Success(
+					new BaseResponseBody("User registered")
+				);
+			}
 		}
-		if (isLogin === "true") {
+		case "DELETE": {
+			const token: string | undefined = event.headers.authorization;
+			if (token === undefined) {
+				return AppResponse.MissingAuth;
+			}
+
+			const payload: JwtPayload | null = TokenDTO.deserialize(token);
+			// also used to return 500 error with an unknown jwt error
+			if (!payload) {
+				return AppResponse.UnreadableToken;
+			}
+			if (
+				reqUser.username !== payload["username"] ||
+				!ObjectId.isValid(payload["id"])
+			) {
+				return AppResponse.WrongToken;
+			}
+
 			const collection: Collection<User> = await AppDatabase.collection(
 				"user"
 			);
-			const dbUser: User | null = await collection.findOne({
+			const dbUser: Required<User> | null = await collection.findOne({
 				username: reqUser.username,
 			});
 
 			if (!dbUser) {
-				return new AppResponse(
-					400,
-					new AppResponseBody(
-						"No user with that username exists",
-						true
-					)
-				);
+				return AppResponse.BadRequest("User doesn't exist");
 			}
 
 			try {
@@ -85,145 +136,15 @@ export async function handler(event: HandlerEvent): Promise<AppResponse> {
 					dbUser.password
 				);
 				if (!match) {
-					return new AppResponse(
-						400,
-						new AppResponseBody("Wrong password", true)
-					);
+					return AppResponse.BadRequest("Wrong password");
 				}
 			} catch (error) {
-				return new AppResponse(
-					500,
-					new AppResponseBody(`Unexpected error: ${error}`, true)
-				);
+				return AppResponse.ServerError(error);
 			}
 
-			let id: ObjectId | undefined = undefined;
-			if (dbUser._id !== undefined) {
-				id = dbUser._id;
-			}
-
-			const token: string = jwt.sign(
-				{
-					username: dbUser.username,
-					id,
-				},
-				process.env.JWT_SECRET
-			);
-
-			return new AppResponse(
-				200,
-				new AppResponseBody("Logged in", false, { token })
-			);
-		} else {
-			const collection: Collection<User> = await AppDatabase.collection(
-				"user"
-			);
-			const dbUser: User | null = await collection.findOne({
-				username: reqUser.username,
-			});
-
-			if (dbUser) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("User already exists", true)
-				);
-			}
-
-			try {
-				reqUser.password = await bcrypt.hash(reqUser.password, 10);
-				collection.insertOne(reqUser);
-			} catch (error) {
-				return new AppResponse(
-					500,
-					new AppResponseBody(`Unexpected error: ${error}`, true)
-				);
-			}
-
-			return new AppResponse(
-				200,
-				new AppResponseBody(`User ${reqUser.username} registered`)
-			);
+			collection.deleteOne({ username: reqUser.username });
+			return AppResponse.Success(new BaseResponseBody("User deleted"));
 		}
-	} else if (event.httpMethod === "DELETE") {
-		const token: string | undefined = event.headers["authorization"];
-		if (token === undefined) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Missing authorization header", true)
-			);
-		}
-
-		try {
-			const payload: string | JwtPayload = jwt.verify(
-				token,
-				process.env.JWT_SECRET
-			);
-			if (
-				reqUser.username !== payload["username"] ||
-				!ObjectId.isValid(payload["id"])
-			) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token", true)
-				);
-			}
-		} catch (error) {
-			if (
-				error instanceof JsonWebTokenError &&
-				error.message === "jwt malformed"
-			) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token payload", true)
-				);
-			}
-			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
-			);
-		}
-
-		const collection: Collection<User> = await AppDatabase.collection(
-			"user"
-		);
-		const dbUser: User | null = await collection.findOne({
-			username: reqUser.username,
-		});
-
-		if (!dbUser) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("User doesn't exist", true)
-			);
-		}
-
-		try {
-			const match: boolean = await bcrypt.compare(
-				reqUser.password,
-				dbUser.password
-			);
-			if (!match) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Wrong password", true)
-				);
-			}
-		} catch (error) {
-			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
-			);
-		}
-
-		collection.deleteOne({ username: reqUser.username });
-		return new AppResponse(
-			200,
-			new AppResponseBody(`User ${reqUser.username} deleted`)
-		);
-	} else {
-		return new AppResponse(
-			405,
-			new AppResponseBody("Invalid HTTP method", true)
-		);
 	}
+	return AppResponse.InvalidMethod;
 }

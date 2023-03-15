@@ -1,9 +1,10 @@
 import { describe, expect, test, TestOptions } from "vitest";
 import { AxiosHeaders, AxiosResponse } from "axios";
-import { AppResponseBody } from "../classes/AppResponse";
+import { BaseResponseBody } from "../classes/BaseResponse";
 import AppRequest from "../classes/AppRequest";
 import User from "../classes/model/User";
 import ExerciseCategory from "../classes/ExerciseCategory";
+import Exercise from "../classes/model/Exercise";
 
 const url = "http://localhost:9999/.netlify/functions/exercise";
 const loginUrl = "http://localhost:9999/.netlify/functions/user";
@@ -13,7 +14,7 @@ let token: string = "";
 
 describe("api/exercise tests", () => {
 	let res: AxiosResponse;
-	let data: AppResponseBody;
+	let data: BaseResponseBody;
 
 	test("any method", async () => {
 		res = await AppRequest.request("PATCH", url);
@@ -26,17 +27,23 @@ describe("api/exercise tests", () => {
 		res = await AppRequest.get(url);
 		data = res.data;
 		expect(data.error).toBeTruthy();
-		expect(data.message).toStrictEqual("Missing query parameter");
+		expect(data.message).toStrictEqual(
+			"Query parameters do not match expected format"
+		);
 
 		res = await AppRequest.get(url, { hello: "world" });
 		data = res.data;
 		expect(data.error).toBeTruthy();
-		expect(data.message).toStrictEqual("Missing query parameter");
+		expect(data.message).toStrictEqual(
+			"Query parameters do not match expected format"
+		);
 
 		res = await AppRequest.get(url, { categories: "" });
 		data = res.data;
 		expect(data.error).toBeTruthy();
-		expect(data.message).toStrictEqual("Missing query parameter");
+		expect(data.message).toStrictEqual(
+			"Query parameters do not match expected format"
+		);
 
 		res = await AppRequest.get(url, { categories: "push,pull,test" });
 		data = res.data;
@@ -74,22 +81,30 @@ describe("api/exercise tests", () => {
 			res = await AppRequest.post(url);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Request is missing body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, { hello: "world" });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing content in body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, { name: "test" });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing content in body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, { name: "test", categories: [] });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing content in body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, {
 				name: 0,
@@ -97,7 +112,9 @@ describe("api/exercise tests", () => {
 			});
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Body content is wrong type");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, {
 				name: "bench press",
@@ -105,46 +122,45 @@ describe("api/exercise tests", () => {
 			});
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Body content is wrong type");
-
-			res = await AppRequest.post(url, {
-				name: "bench press",
-				categories: [ExerciseCategory.PUSH, ExerciseCategory.STRENGTH],
-			});
-			data = res.data;
-			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing authorization header");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(
 				url,
-				{
-					name: "bench press",
-					categories: [
-						ExerciseCategory.PUSH,
-						ExerciseCategory.STRENGTH,
-					],
-				},
+				new Exercise("bench press", [
+					ExerciseCategory.PUSH,
+					ExerciseCategory.STRENGTH,
+				])
+			);
+			data = res.data;
+			expect(data.error).toBeTruthy();
+			expect(data.message).toStrictEqual("Missing authorization");
+
+			res = await AppRequest.post(
+				url,
+				new Exercise("bench press", [
+					ExerciseCategory.PUSH,
+					ExerciseCategory.STRENGTH,
+				]),
 				new AxiosHeaders().setAuthorization("hello")
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Invalid token payload");
+			expect(data.message).toStrictEqual("Unreadable token");
 
 			res = await AppRequest.post(
 				url,
-				{
-					name: "bench press",
-					categories: [
-						ExerciseCategory.PUSH,
-						ExerciseCategory.STRENGTH,
-					],
-				},
+				new Exercise("bench press", [
+					ExerciseCategory.PUSH,
+					ExerciseCategory.STRENGTH,
+				]),
 				new AxiosHeaders().setAuthorization(token)
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
 			// testuser is not an admin
-			expect(data.message).toStrictEqual("Invalid token");
+			expect(data.message).toStrictEqual("Not admin");
 
 			res = await AppRequest.post(
 				loginUrl,
@@ -158,13 +174,10 @@ describe("api/exercise tests", () => {
 
 			res = await AppRequest.post(
 				url,
-				{
-					name: "bench press",
-					categories: [
-						ExerciseCategory.PUSH,
-						ExerciseCategory.STRENGTH,
-					],
-				},
+				new Exercise("bench press", [
+					ExerciseCategory.PUSH,
+					ExerciseCategory.STRENGTH,
+				]),
 				new AxiosHeaders().setAuthorization(token)
 			);
 			data = res.data;

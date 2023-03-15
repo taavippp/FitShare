@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import AppRequest from '../../classes/AppRequest';
-import { AppResponseBody } from '../../classes/AppResponse';
+import { BaseResponseBody } from '../../classes/BaseResponse'
 import { routes } from '../router';
 import ExerciseCategory from "../../classes/ExerciseCategory"
 import { ref, Ref, toRaw } from 'vue';
@@ -27,7 +27,7 @@ async function verifyAdmin() {
         {},
         new AxiosHeaders().setAuthorization(token)
     )
-    const data: AppResponseBody = res.data
+    const data: BaseResponseBody = res.data
     if (data.error) {
         window.location.assign(routes.home.path)
         return
@@ -49,7 +49,6 @@ function addCategory(event: MouseEvent) {
 async function submitExercise() {
     loading.value = true
     const values: Array<number> = toRaw(categories.value)
-    console.log(values)
     const token = sessionStorage.getItem("token")
     const res = await AppRequest.post(
         exerciseURL,
@@ -59,7 +58,7 @@ async function submitExercise() {
         ),
         new AxiosHeaders().setAuthorization(token)
     )
-    const data: AppResponseBody = res.data
+    const data: BaseResponseBody = res.data
     feedback.value = data.message
     categories.value = []
     loading.value = false

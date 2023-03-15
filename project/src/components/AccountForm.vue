@@ -2,7 +2,7 @@
     import { ref, Ref } from 'vue';
     import User from "@/../../classes/model/User"
     import AppRequest from "@/../../classes/AppRequest"
-    import { AppResponseBody } from "@/../../classes/AppResponse"
+    import { BaseResponseBody } from "../../classes/BaseResponse"
     import { AxiosHeaders, AxiosResponse } from 'axios';
     import { routes } from '../router';
     import Loading from '../components/Loading.vue';
@@ -37,7 +37,7 @@
                 URL,
                 user,
                 new AxiosHeaders({ "X-Login": "true" }))
-            const data: AppResponseBody = res.data
+            const data: BaseResponseBody = res.data
             if (data.error || data.object === undefined) {
                 feedback.value = `${data.message}!`
             } else {
@@ -61,7 +61,7 @@
             URL,
             user,
             new AxiosHeaders({ "X-Login": "false" }))
-        const data: AppResponseBody = res.data
+        const data: BaseResponseBody = res.data
         if (!data.error) {
             setTimeout(setIsSigningIn, 1500);
         }

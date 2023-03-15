@@ -1,7 +1,7 @@
 import { describe, expect, test, TestOptions } from "vitest";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import User from "../classes/model/User";
-import { AppResponseBody } from "../classes/AppResponse";
+import { BaseResponseBody } from "../classes/BaseResponse";
 import AppRequest from "../classes/AppRequest";
 
 // use "npx netlify functions:serve"
@@ -10,7 +10,7 @@ const options: TestOptions = { timeout: 10000 };
 
 describe("/api/user tests", async () => {
 	let res: AxiosResponse;
-	let data: AppResponseBody;
+	let data: BaseResponseBody;
 
 	let token: string;
 
@@ -20,17 +20,23 @@ describe("/api/user tests", async () => {
 			res = await AppRequest.post(url);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Request is missing body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, { hello: "world" });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing content in body");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, { username: 9, password: true });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Body content is wrong type");
+			expect(data.message).toStrictEqual(
+				"Body does not match expected format"
+			);
 
 			res = await AppRequest.post(url, new User("testuser", "password"));
 			data = res.data;
@@ -115,7 +121,7 @@ describe("/api/user tests", async () => {
 			res = await AppRequest.delete(url, new User("hello", "worldson"));
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing authorization header");
+			expect(data.message).toStrictEqual("Missing authorization");
 
 			res = await AppRequest.delete(
 				url,
@@ -124,7 +130,7 @@ describe("/api/user tests", async () => {
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Invalid token payload");
+			expect(data.message).toStrictEqual("Unreadable token");
 
 			res = await AppRequest.delete(
 				url,
@@ -133,7 +139,9 @@ describe("/api/user tests", async () => {
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message, token).toStrictEqual("Invalid token");
+			expect(data.message, token).toStrictEqual(
+				"Token does not match current user"
+			);
 
 			res = await AppRequest.delete(
 				url,
@@ -151,7 +159,7 @@ describe("/api/user tests", async () => {
 			);
 			data = res.data;
 			expect(data.error).toBeFalsy();
-			expect(data.message).toStrictEqual("User testuser deleted");
+			expect(data.message).toStrictEqual("User deleted");
 		},
 		options
 	);
@@ -165,8 +173,8 @@ describe("/api/user tests", async () => {
 				new AxiosHeaders({ "X-Login": "false" })
 			);
 			data = res.data;
-			expect(data.error).toBeFalsy();
-			expect(data.message).toStrictEqual("User testuser registered");
+			expect(data.error, data.message).toBeFalsy();
+			expect(data.message).toStrictEqual("User registered");
 		},
 		options
 	);

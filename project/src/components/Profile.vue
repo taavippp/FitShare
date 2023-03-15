@@ -2,7 +2,7 @@
     import { AxiosHeaders, AxiosResponse } from 'axios';
     import { Ref, ref } from 'vue';
     import AppRequest from '../../classes/AppRequest';
-    import { AppResponseBody } from '../../classes/AppResponse';
+    import { BaseResponseBody } from '../../classes/BaseResponse';
     import User from '../../classes/model/User';
     import { routes } from '../router';
     import Loading from './Loading.vue';
@@ -37,7 +37,7 @@
             new User(props.username || "", password.value),
             new AxiosHeaders().setAuthorization(token)
         )
-        const data: AppResponseBody = res.data
+        const data: BaseResponseBody = res.data
         feedback.value = data.message + "!"
         loading.value = false
         if (!data.error) {

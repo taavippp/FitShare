@@ -1,7 +1,7 @@
 import { describe, expect, test, TestOptions } from "vitest";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import User from "../classes/model/User";
-import { AppResponseBody } from "../classes/AppResponse";
+import { BaseResponseBody } from "../classes/BaseResponse";
 import AppRequest from "../classes/AppRequest";
 
 const loginUrl = "http://localhost:9999/.netlify/functions/user";
@@ -12,7 +12,7 @@ describe(
 	"/api/is_admin tests",
 	async () => {
 		let res: AxiosResponse;
-		let data: AppResponseBody;
+		let data: BaseResponseBody;
 
 		let token: string = "";
 
@@ -27,7 +27,7 @@ describe(
 			res = await AppRequest.get(url);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Missing authorization header");
+			expect(data.message).toStrictEqual("Missing authorization");
 
 			res = await AppRequest.get(
 				url,
@@ -36,7 +36,7 @@ describe(
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Invalid token payload");
+			expect(data.message).toStrictEqual("Unreadable token");
 
 			res = await AppRequest.post(
 				loginUrl,
@@ -55,7 +55,7 @@ describe(
 			);
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual("Invalid token or not admin");
+			expect(data.message).toStrictEqual("Not admin");
 
 			res = await AppRequest.post(
 				loginUrl,
@@ -74,7 +74,7 @@ describe(
 			);
 			data = res.data;
 			expect(data.error).toBeFalsy();
-			expect(data.message).toStrictEqual("testadmin is admin");
+			expect(data.message).toStrictEqual("User is admin");
 		});
 	},
 	options

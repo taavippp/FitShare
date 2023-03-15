@@ -1,48 +1,68 @@
-import { HandlerResponse } from "@netlify/functions";
+import { BaseResponse, BaseResponseBody } from "./BaseResponse";
+import { HttpStatusCode as HTTP } from "axios";
 
-type HeaderValue = boolean | number | string;
+export default class AppResponse {
+	static InvalidBody: BaseResponse = new BaseResponse(
+		HTTP.BadRequest,
+		new BaseResponseBody("Body does not match expected format", true)
+	);
 
-export class AppResponse implements HandlerResponse {
-	statusCode: number;
-	body: string;
-	headers: { [header: string]: HeaderValue } = {
-		"content-type": "application/json",
+	static InvalidQuery: BaseResponse = new BaseResponse(
+		HTTP.BadRequest,
+		new BaseResponseBody(
+			"Query parameters do not match expected format",
+			true
+		)
+	);
+
+	static MissingAuth: BaseResponse = new BaseResponse(
+		HTTP.BadRequest,
+		new BaseResponseBody("Missing authorization", true)
+	);
+
+	/**
+	 * @description Use when JWT is malformed.
+	 */
+	static UnreadableToken: BaseResponse = new BaseResponse(
+		HTTP.BadRequest,
+		new BaseResponseBody("Unreadable token", true)
+	);
+
+	/**
+	 * @description Use when payload["username"] and body["username"] do not match.
+	 */
+	static WrongToken: BaseResponse = new BaseResponse(
+		HTTP.Forbidden,
+		new BaseResponseBody("Token does not match current user", true)
+	);
+
+	static InvalidMethod: BaseResponse = new BaseResponse(
+		HTTP.MethodNotAllowed,
+		new BaseResponseBody("Invalid HTTP method", true)
+	);
+
+	static ServerError = function (error: Error): BaseResponse {
+		return new BaseResponse(
+			HTTP.InternalServerError,
+			new BaseResponseBody(`Unexpected error: ${error}`, true)
+		);
 	};
 
-	constructor(
-		statusCode: number,
-		body: AppResponseBody | string,
-		headers?: { [header: string]: HeaderValue }
-	) {
-		this.statusCode = statusCode;
-		if (body instanceof AppResponseBody) {
-			body = JSON.stringify(body);
-		}
-		this.body = body;
-		if (headers !== undefined) {
-			this.headers = headers;
-		}
-	}
-}
+	static BadRequest = function (message: string): BaseResponse {
+		return new BaseResponse(
+			HTTP.BadRequest,
+			new BaseResponseBody(message, true)
+		);
+	};
 
-type AppResponseBodyObject = { [property: string]: unknown } | undefined;
+	static Forbidden = function (message: string): BaseResponse {
+		return new BaseResponse(
+			HTTP.Forbidden,
+			new BaseResponseBody(message, true)
+		);
+	};
 
-export class AppResponseBody {
-	message: string;
-	error: boolean = false;
-	object?: AppResponseBodyObject;
-
-	constructor(
-		message: string,
-		error?: boolean,
-		object?: AppResponseBodyObject
-	) {
-		this.message = message;
-		if (error !== undefined) {
-			this.error = error;
-		}
-		if (object !== undefined) {
-			this.object = object;
-		}
-	}
+	static Success = function (body: BaseResponseBody) {
+		return new BaseResponse(HTTP.Ok, body);
+	};
 }

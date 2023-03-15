@@ -1,63 +1,38 @@
-import { HandlerEvent } from "@netlify/functions";
-import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
+import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 import { Collection, Db, Admin, ObjectId } from "mongodb";
+import { HandlerEvent } from "@netlify/functions";
 import AppDatabase from "../classes/AppDatabase";
-import { AppResponse, AppResponseBody } from "../classes/AppResponse";
-import jwt from "jsonwebtoken";
+import AppResponse from "../classes/AppResponse";
+import TokenDTO from "../classes/dto/TokenDTO";
+import { JwtPayload } from "jsonwebtoken";
 
-export async function handler(event: HandlerEvent): Promise<AppResponse> {
-	if (event.httpMethod === "GET") {
-		const token: string | undefined = event.headers.authorization;
-		if (token === undefined) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Missing authorization header", true)
-			);
-		}
+export async function handler(event: HandlerEvent): Promise<BaseResponse> {
+	switch (event.httpMethod) {
+		case "GET": {
+			const token: string | undefined = event.headers.authorization;
+			if (!token) {
+				return AppResponse.MissingAuth;
+			}
 
-		try {
-			const payload: string | JwtPayload = jwt.verify(
-				token,
-				process.env.JWT_SECRET
-			);
+			const payload: JwtPayload | null = TokenDTO.deserialize(token);
+			if (!payload) {
+				return AppResponse.UnreadableToken;
+			}
 
 			const db: Db = await AppDatabase.connect();
 			const adminCollection: Collection<Admin> =
 				await AppDatabase.collection("admin", db);
 			const admin: Admin | null = await adminCollection.findOne({
-				username: payload["username"],
+				username: payload.username,
 			});
 
-			if (admin === null || !ObjectId.isValid(payload["id"])) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token or not admin", true)
-				);
+			if (!admin || !ObjectId.isValid(payload.id)) {
+				return AppResponse.Forbidden("Not admin");
 			}
 
-			return new AppResponse(
-				200,
-				new AppResponseBody(`${payload["username"]} is admin`)
-			);
-		} catch (error) {
-			if (
-				error instanceof JsonWebTokenError &&
-				error.message === "jwt malformed"
-			) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token payload", true)
-				);
-			}
-			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
-			);
+			return AppResponse.Success(new BaseResponseBody(`User is admin`));
 		}
-	} else {
-		return new AppResponse(
-			405,
-			new AppResponseBody("Invalid HTTP method", true)
-		);
 	}
+
+	return AppResponse.InvalidMethod;
 }

@@ -1,187 +1,132 @@
-import { HandlerEvent } from "@netlify/functions";
-import { Collection, Db, ObjectId } from "mongodb";
-import AppDatabase from "../classes/AppDatabase";
-import { AppResponse, AppResponseBody } from "../classes/AppResponse";
+import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 import ExerciseCategory from "../classes/ExerciseCategory";
+import DataValidator from "../classes/DataValidator";
+import { Collection, Db, ObjectId } from "mongodb";
+import { HandlerEvent } from "@netlify/functions";
+import AppDatabase from "../classes/AppDatabase";
+import AppResponse from "../classes/AppResponse";
 import Exercise from "../classes/model/Exercise";
-import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
-import User from "../classes/model/User";
+import TokenDTO from "../classes/dto/TokenDTO";
 import Admin from "../classes/model/Admin";
+import { JwtPayload } from "jsonwebtoken";
+import User from "../classes/model/User";
 
 const ExerciseCategoryKeys = Object.keys(ExerciseCategory);
 
-interface BodyExercise {
-	name?: string;
-	categories?: Array<number>;
-}
+type BodyExercise = Omit<Exercise, "_id">;
 
-export async function handler(event: HandlerEvent): Promise<AppResponse> {
-	if (event.httpMethod === "GET") {
-		const query = event.queryStringParameters;
+export async function handler(event: HandlerEvent): Promise<BaseResponse> {
+	switch (event.httpMethod) {
+		case "GET": {
+			const query = event.queryStringParameters;
 
-		if (
-			query === null ||
-			query.categories === undefined ||
-			query.categories === ""
-		) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Missing query parameter", true)
-			);
-		}
-		const queryCategories: Array<string> = query.categories.split(",");
-		const categories: Array<number> = [];
-
-		for (let i = 0; i < queryCategories.length; i++) {
-			const category: string = queryCategories[i].toUpperCase();
-			const index: number = ExerciseCategoryKeys.indexOf(category);
-			if (index === -1) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid category", true)
-				);
+			if (!query || !query.categories) {
+				return AppResponse.InvalidQuery;
 			}
-			categories.push(index);
-		}
+			const queryCategories: Array<string> = query.categories.split(",");
+			const numCategories: Array<number> = [];
 
-		const collection: Collection<Exercise> = await AppDatabase.collection(
-			"exercise"
-		);
-		const exercises = await collection
-			.find(
-				{ category: { $in: categories } },
-				{
-					projection: {
-						category: 0,
-					},
+			for (let i = 0; i < queryCategories.length; i++) {
+				const category: string = queryCategories[i].toUpperCase();
+				const index: number = ExerciseCategoryKeys.indexOf(category);
+				if (index === -1) {
+					return new BaseResponse(
+						400,
+						new BaseResponseBody("Invalid category", true)
+					);
 				}
-			)
-			.toArray();
-		return new AppResponse(
-			200,
-			new AppResponseBody(
-				`${queryCategories.join(", ")} exercises`,
-				false,
-				{
-					exercises,
-				}
-			)
-		);
-	} else if (event.httpMethod === "POST") {
-		if (!event.body) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Request is missing body", true)
+				numCategories.push(index);
+			}
+
+			const collection: Collection<Exercise> =
+				await AppDatabase.collection("exercise");
+			const exercises: Array<Required<Exercise>> = await collection
+				.find(
+					{ category: { $in: numCategories } },
+					{
+						// fetches exercises without "category" property as it is unnecessary
+						projection: {
+							category: 0,
+						},
+					}
+				)
+				.toArray();
+			return AppResponse.Success(
+				new BaseResponseBody(
+					`${queryCategories.join(", ")} exercises`,
+					false,
+					{
+						exercises,
+					}
+				)
 			);
 		}
+		case "POST": {
+			if (!event.body) {
+				return AppResponse.InvalidBody;
+			}
 
-		const body: BodyExercise = JSON.parse(event.body);
-		if (
-			body.name === undefined ||
-			body.categories === undefined ||
-			body.categories.length < 1
-		) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Missing content in body", true)
-			);
-		}
+			const body: BodyExercise = JSON.parse(event.body);
+			if (
+				!DataValidator.isValid(body, {
+					name: "string",
+					categories: "object",
+					categories_element: "number",
+				})
+			) {
+				return AppResponse.InvalidBody;
+			}
 
-		if (
-			!(typeof body.name === "string") ||
-			!(body.categories instanceof Array<number>)
-		) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Body content is wrong type", true)
-			);
-		}
+			if (
+				Math.max(...body.categories) > ExerciseCategoryKeys.length ||
+				Math.min(...body.categories) < 0
+			) {
+				return AppResponse.BadRequest("Invalid exercise category");
+			}
 
-		if (
-			Math.max(...body.categories) > ExerciseCategoryKeys.length ||
-			Math.min(...body.categories) < 0
-		) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Invalid exercise category", true)
-			);
-		}
+			const token: string | undefined = event.headers.authorization;
+			if (!token) {
+				return AppResponse.MissingAuth;
+			}
 
-		const token: string | undefined = event.headers.authorization;
-		if (token === undefined) {
-			return new AppResponse(
-				400,
-				new AppResponseBody("Missing authorization header", true)
-			);
-		}
-
-		try {
-			const payload: string | JwtPayload = jwt.verify(
-				token,
-				process.env.JWT_SECRET
-			);
-
-			const userCollection: Collection<User> =
-				await AppDatabase.collection("user");
-			const user: User | null = await userCollection.findOne({
-				username: payload["username"],
-			});
-
-			if (user === null) {
-				return new AppResponse(
-					400,
-					new AppResponseBody(
-						`User ${payload["username"]} doesn't exist`,
-						true
-					)
-				);
+			const payload: JwtPayload | null = TokenDTO.deserialize(token);
+			if (!payload) {
+				return AppResponse.UnreadableToken;
 			}
 
 			const db: Db = await AppDatabase.connect();
+			const userCollection: Collection<User> =
+				await AppDatabase.collection("user", db);
+			const user: User | null = await userCollection.findOne({
+				username: payload.username,
+			});
+
+			if (!user) {
+				return AppResponse.BadRequest("User doesn't exist");
+			}
+
 			const adminCollection: Collection<Admin> =
 				await AppDatabase.collection("admin", db);
 			const admin: Admin | null = await adminCollection.findOne({
-				username: payload["username"],
+				username: payload.username,
 			});
 
-			if (admin === null || !ObjectId.isValid(payload["id"])) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token", true)
-				);
+			if (!admin || !ObjectId.isValid(payload.id)) {
+				return AppResponse.Forbidden("Not admin");
 			}
-		} catch (error) {
-			if (
-				error instanceof JsonWebTokenError &&
-				error.message === "jwt malformed"
-			) {
-				return new AppResponse(
-					400,
-					new AppResponseBody("Invalid token payload", true)
-				);
-			}
-			return new AppResponse(
-				500,
-				new AppResponseBody(`Unexpected error: ${error}`, true)
+
+			const collection: Collection<Exercise> =
+				await AppDatabase.collection("exercise", db);
+
+			const exercise: Exercise = new Exercise(body.name, body.categories);
+			exercise._id = await collection.countDocuments({});
+			await collection.insertOne(exercise);
+
+			return AppResponse.Success(
+				new BaseResponseBody(`Inserted ${exercise.name}`)
 			);
 		}
-
-		const collection: Collection<Exercise> = await AppDatabase.collection(
-			"exercise"
-		);
-
-		const exercise: Exercise = new Exercise(body.name, body.categories);
-		exercise._id = await collection.countDocuments({});
-		await collection.insertOne(exercise);
-
-		return new AppResponse(
-			200,
-			new AppResponseBody(`Inserted ${exercise.name}`, false)
-		);
-	} else {
-		return new AppResponse(
-			405,
-			new AppResponseBody("Invalid HTTP method", true)
-		);
 	}
+
+	return AppResponse.InvalidMethod;
 }

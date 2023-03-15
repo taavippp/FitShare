@@ -8,12 +8,12 @@
             <h3>is a website for sharing training knowledge.</h3>
         </div>
         <PictureContainer
-        src="../../public/home_apples_shelley-pauls-unsplash.jpg"
-        alt="Apples"
+        src="/home_apples_shelley-pauls-unsplash.jpg"
+        alt="Website"
         text="Create your own workouts and share your knowledge with the world. Browse and comment on workouts posted by others and find inspiration for your own training."
         />
         <PictureContainer
-        src="../../public/barbell_victor-freitas-unsplash.jpg"
+        src="/barbell_victor-freitas-unsplash.jpg"
         alt="Barbell"
         text="Found an interesting workout? Try it out right away with the live training tool which includes a built-in timer and a simple user interface."
         />
