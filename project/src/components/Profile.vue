@@ -4,7 +4,7 @@
     import AppRequest from '../../classes/AppRequest';
     import { BaseResponseBody } from '../../classes/BaseResponse';
     import User from '../../classes/model/User';
-    import { routes } from '../router';
+    import { paths } from '../router';
     import Loading from './Loading.vue';
     import { RouterLink } from 'vue-router';
     
@@ -22,7 +22,7 @@
     function signOut() {
         sessionStorage.removeItem("username")
         sessionStorage.removeItem("token")
-        window.location.assign(routes.home.path)
+        window.location.assign(paths.home)
     }
 
     async function deleteAccount() {
@@ -44,10 +44,6 @@
             setTimeout(signOut, 1500)
         }
     }
-
-    async function goToAdminPage() {
-        window.location.assign(routes.admin.path)
-    }
 </script>
 <template>
     <Loading v-if="loading"/>
@@ -61,7 +57,7 @@
             <input type="password" name="password" v-model="password">
         </div>
         <button class="Risky" @click="deleteAccount">Delete account</button>
-        <RouterLink :to="routes.admin.path"><button>Admin</button></RouterLink>
+        <RouterLink :to="paths.admin"><button>Admin</button></RouterLink>
     </div>
 </template>
 <style scoped>

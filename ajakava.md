@@ -14,7 +14,12 @@
 ## 6. - 12. märts
 - Lähem tutvumine Vue'ga.
 - Administraatori lehed ja süsteemid.
-- Postituse loomise leht ja süsteem.
 ## 13. - 19. märts
+- Postituse loomise leht ja süsteem.
 - Postituste näitamise ja otsingu leht.
+## 20. - 26. märts
+- Kommentaaride loomise süsteem.
+- Mobiilsele disainile keskendumine ehk mingis mõttes *redesign*.
 - Treeningu läbiviimise lehe loomine.
+## 27. märts - 2. aprill
+- Vigade parandus?

@@ -4,7 +4,7 @@
     import AppRequest from "@/../../classes/AppRequest"
     import { BaseResponseBody } from "../../classes/BaseResponse"
     import { AxiosHeaders, AxiosResponse } from 'axios';
-    import { routes } from '../router';
+    import { paths } from '../router';
     import Loading from '../components/Loading.vue';
     import UserDTO from "../../classes/dto/UserDTO"
 
@@ -51,7 +51,7 @@
                 )
                 feedback.value = "Successfully logged in!"
                 setTimeout(function() {
-                    window.location.assign(routes.home.path)
+                    window.location.assign(paths.home)
                 }, 2000)
             }
             loading.value = false

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 
-describe("AppResponseBody class", () => {
+describe("BaseResponseBody class", () => {
 	test("message property", () => {
 		const body: BaseResponseBody = new BaseResponseBody("Hello world!");
 		expect(body.message).toStrictEqual("Hello world!");
@@ -23,7 +23,7 @@ describe("AppResponseBody class", () => {
 	});
 });
 
-describe("AppResponse class", () => {
+describe("BaseResponse class", () => {
 	test("statusCode property", () => {
 		const res: BaseResponse = new BaseResponse(200, "");
 		expect(res.statusCode).toStrictEqual(200);
@@ -36,7 +36,7 @@ describe("AppResponse class", () => {
 		res = new BaseResponse(200, new BaseResponseBody("Hello world!", true));
 		expect(
 			res.body,
-			"body takes AppResponseBody as argument and converts it to string"
+			"body takes BaseResponseBody as argument and converts it to string"
 		).toStrictEqual(`{"message":"Hello world!","error":true}`);
 	});
 	test("headers property", () => {

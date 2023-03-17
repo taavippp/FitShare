@@ -19,7 +19,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 	const body: BodyUser = JSON.parse(event.body);
 	if (
-		!DataValidator.isValid(body, {
+		!DataValidator.isObjectValid(body, {
 			username: "string",
 			password: "string",
 		})

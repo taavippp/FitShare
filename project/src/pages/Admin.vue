@@ -2,7 +2,7 @@
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import AppRequest from '../../classes/AppRequest';
 import { BaseResponseBody } from '../../classes/BaseResponse'
-import { routes } from '../router';
+import { paths } from '../router';
 import ExerciseCategory from "../../classes/ExerciseCategory"
 import { ref, Ref, toRaw } from 'vue';
 import Loading from '../components/Loading.vue';
@@ -29,7 +29,7 @@ async function verifyAdmin() {
     )
     const data: BaseResponseBody = res.data
     if (data.error) {
-        window.location.assign(routes.home.path)
+        window.location.assign(paths.home)
         return
     }
     verified.value = true

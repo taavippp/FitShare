@@ -19,9 +19,8 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.UnreadableToken;
 			}
 
-			const db: Db = await AppDatabase.connect();
 			const adminCollection: Collection<Admin> =
-				await AppDatabase.collection("admin", db);
+				await AppDatabase.collection("admin");
 			const admin: Admin | null = await adminCollection.findOne({
 				username: payload.username,
 			});

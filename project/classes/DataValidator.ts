@@ -1,40 +1,47 @@
 type PropertyType = "string" | "number" | "boolean" | "object";
 
 export default class DataValidator {
-	static isValid(
-		data: Object,
-		type: { [property: string]: PropertyType }
+	/**
+	 * @param type.property
+	 * If property is an array, the property type is `"object"`.
+	 * Children of the array should be marked with `name$1`.
+	 * If the children of the array have further children, use `name$depth`, where `depth` is an integer.
+	 */
+	public static isObjectValid(
+		object: Object,
+		types: { [property: string]: PropertyType }
 	): boolean {
-		const properties: Array<string> = Object.keys(type);
-		const checked: Array<string> = [];
-		for (let i = 0; i < properties.length; i++) {
-			const property = properties[i];
-
-			if (checked.includes(property)) {
-				continue;
+		const keys: Array<string> = Object.keys(types);
+		let isValid: boolean = true;
+		for (let i = 0; i < keys.length; i++) {
+			const key: string = keys[i];
+			const type: PropertyType = types[key];
+			const value: any = DataValidator.getValue(object, key);
+			if (!value || typeof value !== type) {
+				console.log(key);
+				isValid = false;
 			}
-
-			if (!data[property] || typeof data[property] !== type[property]) {
-				return false;
-			}
-
-			// JSON.parse parses arrays as objects
-			if (type[property] === "object" && "length" in data[property]) {
-				if (data[property].length === 0) {
-					return false;
-				}
-				const arrayProperty = `${property}_element`;
-				if (
-					!data[property][0] ||
-					typeof data[property][0] !== type[arrayProperty]
-				) {
-					return false;
-				}
-				checked.push(arrayProperty);
-			}
-
-			checked.push(property);
 		}
-		return true;
+		return isValid;
+	}
+
+	private static getValue(object: any, key: string): any {
+		const len: number = key.length;
+		if (key[len - 2] === "$") {
+			const depth: number = parseInt(key[len - 1]);
+			let value: Array<any> = object[key.replace(/\$\d/, "")];
+			for (let i = 0; i < depth - 1; i++) {
+				value = value[0];
+			}
+			const set: Set<string> = new Set();
+			value.map(function (value: unknown) {
+				set.add(typeof value);
+			});
+			if (set.size !== 1) {
+				return null;
+			}
+			return value[0];
+		}
+		return object[key];
 	}
 }

@@ -68,10 +68,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const body: BodyExercise = JSON.parse(event.body);
 			if (
-				!DataValidator.isValid(body, {
+				!DataValidator.isObjectValid(body, {
 					name: "string",
 					categories: "object",
-					categories_element: "number",
+					categories$1: "number",
 				})
 			) {
 				return AppResponse.InvalidBody;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { RouterLink } from 'vue-router';
-    import { routes } from '../router';
+    import { paths } from '../router';
     
     const username: string | null = sessionStorage.getItem("username")
     const loggedIn: boolean = username !== null
@@ -8,16 +8,16 @@
 <template>
     <nav class="mainNav">
         <span class="left">
-            <RouterLink :to="routes.home.path">
+            <RouterLink :to="paths.home">
                 <img src="../assets/logo-96.png" alt="FitShare logo">
             </RouterLink>
             <h1>FitShare</h1>
         </span>
         <span class="right">
-            <RouterLink :to="routes.create.path"><button>+</button></RouterLink>
-            <RouterLink :to="routes.train.path"><button>Train</button></RouterLink>
-            <RouterLink :to="routes.browse.path"><button>Browse</button></RouterLink>
-            <RouterLink :to="routes.account.path"><button class="Account" :class="loggedIn ? `LoggedIn` : ``">{{ username ?? "Account" }}</button></RouterLink>
+            <RouterLink :to="paths.create" v-if="loggedIn"><button>+</button></RouterLink>
+            <RouterLink :to="paths.train"><button>Train</button></RouterLink>
+            <RouterLink :to="paths.browse"><button>Browse</button></RouterLink>
+            <RouterLink :to="paths.account"><button class="Account" :class="loggedIn ? `LoggedIn` : ``">{{ username ?? "Account" }}</button></RouterLink>
         </span>
     </nav>
 </template>

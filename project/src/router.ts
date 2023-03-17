@@ -11,33 +11,43 @@ import ErrorPage from "./pages/Error.vue";
 import AccountPage from "./pages/Account.vue";
 import AdminPage from "./pages/Admin.vue";
 
-export const routes: { [name: string]: RouteRecordRaw } = {
+export const paths: { [path: string]: string } = {
+	home: "/",
+	train: "/train",
+	browse: "/browse",
+	account: "/account",
+	create: "/create",
+	admin: "/admin",
+	error: "/:pathMatch(.*)",
+};
+
+const routes: { [name: string]: RouteRecordRaw } = {
 	home: {
-		path: "/",
+		path: paths.home,
 		component: HomePage,
 	},
 	train: {
-		path: "/train",
+		path: `${paths.train}/:postID?`,
 		component: ErrorPage,
 	},
 	browse: {
-		path: "/browse",
+		path: `${paths.browse}/:postID?`,
 		component: ErrorPage,
 	},
 	account: {
-		path: "/account",
+		path: paths.account,
 		component: AccountPage,
 	},
 	create: {
-		path: "/create",
+		path: paths.create,
 		component: ErrorPage,
 	},
 	admin: {
-		path: "/admin",
+		path: paths.admin,
 		component: AdminPage,
 	},
 	error: {
-		path: "/*",
+		path: paths.error,
 		component: ErrorPage,
 	},
 };

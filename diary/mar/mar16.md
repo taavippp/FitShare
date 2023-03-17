@@ -1,0 +1,3 @@
+# 16. märts
+## Ajakulu: 4h
+Lõin täna *post.ts* faili ehk postitustega tegeleva taustafunktsiooni. On võimalik lühida (kuid minu arvates küllaltki unikaalse) ID abil leida postitus, on võimalik luua postitus ja tema ja ta vastavad kommentaarid ka kustutada. Lisaks tegin natuke Vue ruuteri loogikat ümber ja vist sain lõpuks aru, miks Netlify vahest tuimalt veateatelehti viskab ja tegin ka seal vastavaid muudatusi. Kirjutasin ka mõned testid, aga mitte kõik, mis vaja on.
