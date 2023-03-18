@@ -12,6 +12,7 @@ import { JwtPayload } from "jsonwebtoken";
 import Post from "../classes/model/Post";
 
 type BodyPost = Omit<Post, "_id" | "userID">;
+type BodyPostID = { id: string };
 
 export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	switch (event.httpMethod) {
@@ -55,41 +56,37 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			const body: BodyPost = JSON.parse(event.body);
 
 			const exerciseIDs: Array<number> = [];
-			const content: Array<Array<number>> = body.content.map(
-				(exercise: PostExercise) => {
-					exerciseIDs.push(exercise.exerciseID);
-					return PostExerciseDTO.serialize(exercise);
+			const content: Array<Array<number | null>> = body.content.map(
+				(pe: PostExercise) => {
+					exerciseIDs.push(pe.eID);
+					return PostExerciseDTO.serialize(pe);
 				}
 			);
 
-			const serializedPost = {
-				title: body.title,
-				content,
-			};
-
-			if (
-				!DataValidator.isObjectValid(serializedPost, {
-					title: "string",
-					content: "object",
-					content$1: "object",
-					content$2: "number",
-				})
-			) {
-				return AppResponse.InvalidBody;
+			if (body.title.length < 5 || body.title.length > 30) {
+				return AppResponse.BadRequest(
+					"Post title is over limit (5-30 symbols)"
+				);
 			}
 
-			for (let i = 0; i < body.content.length; i++) {
-				const exercise: PostExercise = body.content[i];
-				if (
-					exercise.sets < 1 ||
-					exercise.sets > 25 ||
-					exercise.repetitions < 1 ||
-					exercise.repetitions > 50 ||
-					(exercise.intensity &&
-						(exercise.intensity < 1 || exercise.intensity > 10))
-				) {
-					return AppResponse.InvalidBody;
-				}
+			if (content.length < 1 || content.length > 25) {
+				return AppResponse.BadRequest(
+					"Post exercise amount is over limit (1-25)"
+				);
+			}
+
+			if (
+				!DataValidator.isObjectValid(
+					{ title: body.title, content },
+					{
+						title: "string",
+						content: "object",
+						content$1: "object",
+						content$2: "number",
+					}
+				)
+			) {
+				return AppResponse.InvalidBody;
 			}
 
 			const db: Db = await AppDatabase.connect();
@@ -111,10 +108,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			)}`;
 
 			const post: Post = new Post(
-				id,
 				body.title,
-				new ObjectId(payload.id),
-				body.content
+				body.content,
+				id,
+				new ObjectId(payload.id)
 			);
 
 			const postCollection: Collection<Post> =
@@ -137,11 +134,16 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			}
 			const userID: string = payload.id;
 
-			const query = event.queryStringParameters;
-			if (!query || !query.id) {
-				return AppResponse.InvalidQuery;
+			if (!event.body) {
+				return AppResponse.InvalidBody;
 			}
-			const postID: string = query.id;
+
+			const body: BodyPostID = JSON.parse(event.body);
+			if (!DataValidator.isObjectValid(body, { id: "string" })) {
+				return AppResponse.InvalidBody;
+			}
+
+			const postID: string = body.id;
 
 			const db: Db = await AppDatabase.connect();
 			const commentCollection: Collection<Comment> =

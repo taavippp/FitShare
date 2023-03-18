@@ -9,13 +9,18 @@ export default class Post implements CountedModel {
 	content: Array<PostExercise>;
 
 	constructor(
-		_id: string,
 		title: string,
-		userID: ObjectId,
-		content: Array<PostExercise>
+		content: Array<PostExercise>,
+		_id?: string,
+		userID?: ObjectId
 	) {
-		this.title = title;
-		this.userID = userID;
+		this.title = title as string;
 		this.content = content;
+		if (userID) {
+			this.userID = userID;
+		}
+		if (_id) {
+			this._id = _id;
+		}
 	}
 }

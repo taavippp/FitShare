@@ -1,20 +1,34 @@
+/**
+ * Number range rules enforced in `PostExerciseDTO.ts`.
+ */
 export default class PostExercise {
-	exerciseID: number;
+	/**
+	 * @param eID
+	 * ID from Exercise collection.
+	 */
+	eID: number;
+	/**
+	 * @param sets
+	 * Number between 1 and 25.
+	 */
 	sets: number;
-	repetitions: number;
-	intensity?: number;
+	/**
+	 * @param reps
+	 * Number between 1 and 50.
+	 */
+	reps: number;
+	/**
+	 * @param RPE
+	 * Rated perceived exertion, number between 1 and 10.
+	 */
+	RPE?: number;
 
-	constructor(
-		exerciseID: number,
-		sets: number,
-		repetitions: number,
-		intensity?: number
-	) {
-		this.exerciseID = exerciseID;
+	constructor(eID: number, sets: number, reps: number, RPE?: number) {
+		this.eID = eID;
 		this.sets = sets;
-		this.repetitions = repetitions;
-		if (intensity !== undefined) {
-			this.intensity = intensity;
+		this.reps = reps;
+		if (RPE !== undefined) {
+			this.RPE = RPE;
 		}
 	}
 }

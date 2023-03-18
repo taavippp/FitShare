@@ -18,7 +18,6 @@ export default class DataValidator {
 			const type: PropertyType = types[key];
 			const value: any = DataValidator.getValue(object, key);
 			if (!value || typeof value !== type) {
-				console.log(key);
 				isValid = false;
 			}
 		}
@@ -27,9 +26,16 @@ export default class DataValidator {
 
 	private static getValue(object: any, key: string): any {
 		const len: number = key.length;
+		const trimmed: string = key.replace(/\$\d/, "");
+		if (!(trimmed in object)) {
+			return null;
+		}
 		if (key[len - 2] === "$") {
 			const depth: number = parseInt(key[len - 1]);
-			let value: Array<any> = object[key.replace(/\$\d/, "")];
+			let value: Array<any> = object[trimmed];
+			if (!Array.isArray(value)) {
+				return null;
+			}
 			for (let i = 0; i < depth - 1; i++) {
 				value = value[0];
 			}
