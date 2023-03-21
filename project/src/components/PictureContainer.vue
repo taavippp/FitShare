@@ -2,13 +2,12 @@
     defineProps<{
         src: string,
         alt: string,
-        text: string,
     }>()
 </script>
 <template>
     <div class="PictureContainer">
         <img :src="src" :alt="alt">
-        <p>{{ text }}</p>
+        <p><slot></slot></p>
     </div>
 </template>
 <style scoped>

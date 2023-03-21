@@ -88,10 +88,10 @@ describe(
 			res = await AppRequest.post(
 				postURL,
 				new Post("Example post", [
-					new PostExercise(1, 3, 5, 6),
+					new PostExercise(1, 3, 5),
 					new PostExercise(3, 3, 30),
 					// Invalid ID
-					new PostExercise(-3, 4, 2, 8),
+					new PostExercise(-3, 4, 2),
 				]),
 				new AxiosHeaders().setAuthorization(token)
 			);
@@ -102,9 +102,9 @@ describe(
 			res = await AppRequest.post(
 				postURL,
 				new Post("Example post", [
-					new PostExercise(1, 3, 5, 6),
+					new PostExercise(1, 3, 5),
 					new PostExercise(3, 3, 30),
-					new PostExercise(5, 4, 2, 8),
+					new PostExercise(5, 4, 2),
 				]),
 				new AxiosHeaders().setAuthorization(token)
 			);

@@ -17,18 +17,10 @@ export default class PostExercise {
 	 * Number between 1 and 50.
 	 */
 	reps: number;
-	/**
-	 * @param RPE
-	 * Rated perceived exertion, number between 1 and 10.
-	 */
-	RPE?: number;
 
-	constructor(eID: number, sets: number, reps: number, RPE?: number) {
+	constructor(eID: number, sets: number, reps: number) {
 		this.eID = eID;
 		this.sets = sets;
 		this.reps = reps;
-		if (RPE !== undefined) {
-			this.RPE = RPE;
-		}
 	}
 }

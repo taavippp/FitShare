@@ -16,10 +16,12 @@
 - Administraatori lehed ja süsteemid.
 ## 13. - 19. märts
 - Postituse loomise leht ja süsteem.
-- Postituste näitamise ja otsingu leht.
 ## 20. - 26. märts
 - Kommentaaride loomise süsteem.
-- Mobiilsele disainile keskendumine ehk mingis mõttes *redesign*.
-- Treeningu läbiviimise lehe loomine.
+- Postituste näitamise ja otsingu leht.
 ## 27. märts - 2. aprill
-- Vigade parandus?
+- Treeningu läbiviimise lehe loomine.
+- Mobiilsele disainile keskendumine ehk mingis mõttes *redesign*.
+- Lasen mõnel inimesel testida.
+## Edaspidi
+- Vigade parandus ja edasine testimine.

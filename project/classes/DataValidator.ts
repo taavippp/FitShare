@@ -20,6 +20,7 @@ export default class DataValidator {
 			if (!value || typeof value !== type) {
 				isValid = false;
 			}
+			if (!isValid) console.log(key);
 		}
 		return isValid;
 	}

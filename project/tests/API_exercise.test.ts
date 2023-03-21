@@ -52,12 +52,12 @@ describe("api/exercise tests", () => {
 		expect(data.error).toBeTruthy();
 		expect(data.message).toStrictEqual("Invalid category");
 
-		res = await AppRequest.get(exerciseURL, { categories: "hello,world" });
+		res = await AppRequest.get(exerciseURL, { categories: "hello-world" });
 		data = res.data;
 		expect(data.error).toBeTruthy();
 		expect(data.message).toStrictEqual("Invalid category");
 
-		res = await AppRequest.get(exerciseURL, { categories: "push,legs" });
+		res = await AppRequest.get(exerciseURL, { categories: "push-legs" });
 		data = res.data;
 		expect(data.error).toBeFalsy();
 		expect(data.message).toStrictEqual("push, legs exercises");

@@ -35,24 +35,14 @@ describe("PostExerciseDTO tests", () => {
 		pe = new PostExercise(123, 10, 100);
 		result = isValidArray(PostExerciseDTO.serialize(pe));
 		expect(result).toBeFalsy();
-
-		// RPE is too low
-		pe = new PostExercise(123, 10, 25, 0);
-		result = isValidArray(PostExerciseDTO.serialize(pe));
-		expect(result).toBeFalsy();
-
-		// RPE is too high
-		pe = new PostExercise(123, 10, 25, 11);
-		result = isValidArray(PostExerciseDTO.serialize(pe));
-		expect(result).toBeFalsy();
 	});
 
 	test("Passing cases", () => {
-		pe = new PostExercise(123, 1, 1, 10);
+		pe = new PostExercise(123, 1, 1);
 		result = isValidArray(PostExerciseDTO.serialize(pe));
 		expect(result).toBeTruthy();
 
-		pe = new PostExercise(123, 25, 50, 1);
+		pe = new PostExercise(123, 25, 50);
 		result = isValidArray(PostExerciseDTO.serialize(pe));
 		expect(result).toBeTruthy();
 	});

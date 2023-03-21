@@ -25,8 +25,9 @@ body {
   --color_nav_button: white;
   --color_nav_button_hover: #eee;
   --color_button: #eee;
-  --color_button_hover: #ddd;
-  --color_logged_in: #33aa33;
+  --color_button_active: #ddd;
+  --color_post: #55dd55;
+  --color_post_active: #117711;
   --font_logo: 'Fjalla One', sans-serif;
   --font_large: 'Oxygen', sans-serif;
   --font: 'Tajawal', sans-serif;
@@ -38,6 +39,8 @@ body {
 
 h2, h3, h4 {
   font-family: var(--font_large);
+  margin: .5rem;
+  text-align: center;
 }
 
 h2 {
@@ -64,6 +67,6 @@ button:hover {
 }
 
 button:active {
-  background-color: var(--color_button_hover);
+  background-color: var(--color_button_active);
 }
 </style>

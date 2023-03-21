@@ -1,6 +1,6 @@
 <template>
     <div>
-        <img src="./../assets/loading.gif" alt="Loading animation">
+        <img src="/loading.gif" alt="Loading animation">
     </div>
 </template>
 <style scoped>

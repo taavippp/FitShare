@@ -23,7 +23,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			if (!query || !query.categories) {
 				return AppResponse.InvalidQuery;
 			}
-			const queryCategories: Array<string> = query.categories.split(",");
+			const queryCategories: Array<string> = query.categories.split("-");
 			const numCategories: Array<number> = [];
 
 			for (let i = 0; i < queryCategories.length; i++) {
@@ -42,7 +42,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				await AppDatabase.collection("exercise");
 			const exercises: Array<Required<Exercise>> = await collection
 				.find(
-					{ category: { $in: numCategories } },
+					{ categories: { $in: numCategories } },
 					{
 						// fetches exercises without "category" property as it is unnecessary
 						projection: {
@@ -50,6 +50,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 						},
 					}
 				)
+				.sort({ name: "asc" })
 				.toArray();
 			return AppResponse.Success(
 				new BaseResponseBody(
@@ -119,7 +120,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				await AppDatabase.collection("exercise", db);
 
 			const exercise: Exercise = new Exercise(body.name, body.categories);
-			exercise._id = await collection.countDocuments({});
+			exercise._id = await collection.countDocuments({}) + 1;
 			await collection.insertOne(exercise);
 
 			return AppResponse.Success(

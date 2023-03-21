@@ -9,7 +9,7 @@
     <nav class="mainNav">
         <span class="left">
             <RouterLink :to="paths.home">
-                <img src="../assets/logo-96.png" alt="FitShare logo">
+                <img src="/logo-96.png" alt="FitShare logo">
             </RouterLink>
             <h1>FitShare</h1>
         </span>

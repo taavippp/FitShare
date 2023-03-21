@@ -10,13 +10,15 @@
         <PictureContainer
         src="/home_apples_shelley-pauls-unsplash.jpg"
         alt="Website"
-        text="Create your own workouts and share your knowledge with the world. Browse and comment on workouts posted by others and find inspiration for your own training."
-        />
+        >
+        Create your own workouts and share your knowledge with the world. Browse and comment on workouts posted by others and find inspiration for your own training.
+        </PictureContainer>
         <PictureContainer
         src="/barbell_victor-freitas-unsplash.jpg"
         alt="Barbell"
-        text="Found an interesting workout? Try it out right away with the live training tool which includes a built-in timer and a simple user interface."
-        />
+        >
+        Found an interesting workout? Try it out right away with the live training tool which includes a built-in timer and a simple user interface.
+        </PictureContainer>
         <div class="Footer">
             Taavi Pahk 2023
             <a href="https://github.com/taavippp/fit-share" target="_blank">GitHub</a>

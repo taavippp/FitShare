@@ -10,6 +10,7 @@ import HomePage from "./pages/Home.vue";
 import ErrorPage from "./pages/Error.vue";
 import AccountPage from "./pages/Account.vue";
 import AdminPage from "./pages/Admin.vue";
+import CreatePage from "./pages/Create.vue";
 
 export const paths: { [path: string]: string } = {
 	home: "/",
@@ -40,7 +41,7 @@ const routes: { [name: string]: RouteRecordRaw } = {
 	},
 	create: {
 		path: paths.create,
-		component: ErrorPage,
+		component: CreatePage,
 	},
 	admin: {
 		path: paths.admin,

@@ -55,10 +55,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const body: BodyPost = JSON.parse(event.body);
 
-			const exerciseIDs: Array<number> = [];
+			const exerciseIDs: Set<number> = new Set();
 			const content: Array<Array<number | null>> = body.content.map(
 				(pe: PostExercise) => {
-					exerciseIDs.push(pe.eID);
+					exerciseIDs.add(pe.eID);
 					return PostExerciseDTO.serialize(pe);
 				}
 			);
@@ -86,7 +86,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					}
 				)
 			) {
-				return AppResponse.InvalidBody;
+				return AppResponse.BadRequest("DataValidator");
 			}
 
 			const db: Db = await AppDatabase.connect();
@@ -94,10 +94,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				await AppDatabase.collection("exercise", db);
 
 			const count: number = await exerciseCollection.countDocuments({
-				_id: { $in: exerciseIDs },
+				_id: { $in: Array.from(exerciseIDs) },
 			});
 
-			if (count !== exerciseIDs.length) {
+			if (count !== exerciseIDs.size) {
 				return AppResponse.BadRequest("Invalid exercise ID");
 			}
 
