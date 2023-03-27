@@ -15,8 +15,8 @@ const props = defineProps<{
 
 const postExercise: Ref<PostExercise> = ref(new PostExercise(
     props.exercise._id,
-    1,
-    1,
+    3,
+    5,
 ))
 
 function onChange(event: Event) {
@@ -33,6 +33,7 @@ function onChange(event: Event) {
             postExercise.value.reps = value
             break;
     }
+    console.log(postExercise.value)
     props.setPostExercise(props.index, postExercise.value)
 }
 

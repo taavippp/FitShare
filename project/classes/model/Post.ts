@@ -1,21 +1,22 @@
 import { ObjectId } from "mongodb";
 import CountedModel from "../CountedModel";
-import PostExercise from "./PostExercise";
 
 export default class Post implements CountedModel {
-	_id: string;
+	_id?: string;
 	title: string;
-	userID: ObjectId;
-	content: Array<PostExercise>;
+	userID?: ObjectId;
+	content: Array<Array<number>>;
+	timestamp: number;
 
 	constructor(
 		title: string,
-		content: Array<PostExercise>,
+		content: Array<Array<number>>,
 		_id?: string,
 		userID?: ObjectId
 	) {
 		this.title = title as string;
 		this.content = content;
+		this.timestamp = Date.now();
 		if (userID) {
 			this.userID = userID;
 		}

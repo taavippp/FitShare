@@ -82,13 +82,16 @@ async function getExercises() {
 }
 
 function addPostElement() {
+    if (postElements.value.length === 25) {
+        return
+    }
     postElements.value.push(
         {
             editable: true,
             exercise: new PostExercise(
                 filtered.value[0]._id,
-                1,
-                1
+                3,
+                5,
             )
         }
     )
@@ -111,7 +114,6 @@ function scrollToTop() {
 }
 
 async function post() {
-
     const postExercises: Array<PostExercise> = toRaw(postElements.value).map(
         (element: PostElement) => {
             return element.exercise
@@ -124,14 +126,18 @@ async function post() {
         return
     }
 
-    for (let i = 0; i < postExercises.length; i++) {
-        const pe: PostExercise = postExercises[i]
-        const serialized: Array<number | null> = PostExerciseDTO.serialize(pe)
-        if (!serialized) {
+    let hasInvalidData: boolean = false
+    const serialized: Array<Array<number | null>> = postExercises.map((postExercise: PostExercise) => {
+        const data: Array<number | null> = PostExerciseDTO.serialize(postExercise)
+        if (data.includes(null)) {
+            hasInvalidData = true
+        }
+        return data
+    })
+    if (hasInvalidData) {
             feedback.value = "Exercises must have 1-25 sets and 1-50 reps."
             scrollToTop()
             return
-        }
     }
 
     if (title.value.length < 5 || title.value.length > 30) {
@@ -144,7 +150,7 @@ async function post() {
 
     const post: Post = new Post(
         title.value,
-        postExercises
+        serialized as Array<Array<number>>
     )
 
     const token: string | null = sessionStorage.getItem("token")
@@ -193,7 +199,11 @@ async function post() {
         <div class="PostElements">
             <PostElement
             v-for="(element, index) in postElements"
-            :exercise="allExercises.filter((exercise) => element.exercise.eID === exercise._id)[0]"
+            :exercise="
+                allExercises.find((exercise) => {
+                    return element.exercise.eID === exercise._id
+                })!
+            "
             :setPostExercise="setPostExercise"
             :removeElement="removeElement"
             :editable="element.editable"

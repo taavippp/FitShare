@@ -11,6 +11,7 @@ import ErrorPage from "./pages/Error.vue";
 import AccountPage from "./pages/Account.vue";
 import AdminPage from "./pages/Admin.vue";
 import CreatePage from "./pages/Create.vue";
+import BrowsePage from "./pages/Browse.vue";
 
 export const paths: { [path: string]: string } = {
 	home: "/",
@@ -33,7 +34,7 @@ const routes: { [name: string]: RouteRecordRaw } = {
 	},
 	browse: {
 		path: `${paths.browse}/:postID?`,
-		component: ErrorPage,
+		component: BrowsePage,
 	},
 	account: {
 		path: paths.account,

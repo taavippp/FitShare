@@ -6,7 +6,9 @@
 <template>
   <NavBar/>
   <div class="routerView">
-    <RouterView/>
+    <Suspense>
+      <RouterView/>
+    </Suspense>
   </div>
 </template>
 

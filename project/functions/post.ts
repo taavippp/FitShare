@@ -11,32 +11,54 @@ import TokenDTO from "../classes/dto/TokenDTO";
 import { JwtPayload } from "jsonwebtoken";
 import Post from "../classes/model/Post";
 
-type BodyPost = Omit<Post, "_id" | "userID">;
+type BodyPost = { title: string; content: Array<PostExercise> };
 type BodyPostID = { id: string };
+
+const PER_PAGE: number = 10;
 
 export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	switch (event.httpMethod) {
 		case "GET": {
 			const query = event.queryStringParameters;
-			if (!query || !query.id) {
+			if (!query || (!query.id && !query.page)) {
 				return AppResponse.InvalidQuery;
 			}
-			const postID: string = query.id;
+			if (query.id) {
+				const collection: Collection<Post> =
+					await AppDatabase.collection("post");
+				const post: Post | null = await collection.findOne({
+					_id: query.id,
+				});
 
-			const collection: Collection<Post> = await AppDatabase.collection(
-				"post"
-			);
-			const post: Post | null = await collection.findOne({ _id: postID });
+				if (!post) {
+					return AppResponse.BadRequest(
+						"Post with this ID doesn't exist"
+					);
+				}
 
-			if (!post) {
-				return AppResponse.BadRequest(
-					"Post with this ID doesn't exist"
+				return AppResponse.Success(
+					new BaseResponseBody("Found post", false, { post })
 				);
 			}
+			if (query.page) {
+				const page: number = Number.parseInt(query.page);
+				if (isNaN(page) || page < 1) {
+					return AppResponse.InvalidQuery;
+				}
 
-			return AppResponse.Success(
-				new BaseResponseBody("Found post", false, { post })
-			);
+				const collection: Collection<Post> =
+					await AppDatabase.collection("post");
+				const posts: Array<Post> = await collection
+					.find()
+					.sort({ timestamp: "desc", _id: "asc" })
+					.skip(page - 1 * PER_PAGE)
+					.limit(PER_PAGE)
+					.toArray();
+
+				return AppResponse.Success(
+					new BaseResponseBody("Posts", false, { posts })
+				);
+			}
 		}
 		case "POST": {
 			const token: string | undefined = event.headers.authorization;
@@ -109,7 +131,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const post: Post = new Post(
 				body.title,
-				body.content,
+				content as Array<Array<number>>,
 				id,
 				new ObjectId(payload.id)
 			);
