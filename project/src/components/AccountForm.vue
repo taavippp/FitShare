@@ -1,14 +1,14 @@
 <script setup lang="ts">
     import { ref, Ref } from 'vue';
-    import User from "@/../../classes/model/User"
+    import { User, UserSchema } from "@/../../classes/model/User"
     import AppRequest from "@/../../classes/AppRequest"
     import { BaseResponseBody } from "../../classes/BaseResponse"
     import { AxiosHeaders, AxiosResponse } from 'axios';
     import { paths } from '../router';
     import Loading from '../components/Loading.vue';
-    import UserDTO from "../../classes/dto/UserDTO"
 
     const URL: string = "/api/user"
+    const req: AppRequest = new AppRequest(URL)
     
     const isSigningIn: Ref<boolean> = ref(true)
     const username: Ref<string> = ref("")
@@ -24,26 +24,29 @@
 
     async function handleSubmit(): Promise<void> {
         feedback.value = ""
-        const user: User | null = UserDTO.create(username.value, password.value)
-        if (user === null) {
-            feedback.value = "Username must be 3-15 symbols (A-Z, a-z, 0-9, _) and password must be at least 8 symbols!"
+        const user: User = {
+            username: username.value,
+            password: password.value,
+        }
+        const { success } = UserSchema.safeParse(user);
+        if (!success) {
+            feedback.value = "Username must be 3-15 symbols (A-Z, a-z) and password must be at least 8 symbols!"
             return
         }
 
         loading.value = true
 
         if (isSigningIn.value) {
-            const res: AxiosResponse = await AppRequest.post(
-                URL,
-                user,
-                new AxiosHeaders({ "X-Login": "true" }))
+            const res: AxiosResponse = await req.setHeader("X-Login", "true").post(
+                user
+            )
             const data: BaseResponseBody = res.data
-            if (data.error || data.object === undefined) {
+            if (data.error) {
                 feedback.value = `${data.message}!`
             } else {
                 sessionStorage.setItem(
                     "token",
-                    data.object.token as string
+                    data.object!.token as string
                 )
                 sessionStorage.setItem(
                     "username",
@@ -57,10 +60,8 @@
             loading.value = false
             return
         }
-        const res: AxiosResponse = await AppRequest.post(
-            URL,
-            user,
-            new AxiosHeaders({ "X-Login": "false" }))
+        const res: AxiosResponse = await req.setHeader("X-Login", "false").post(
+            user)
         const data: BaseResponseBody = res.data
         if (!data.error) {
             setTimeout(setIsSigningIn, 1500);

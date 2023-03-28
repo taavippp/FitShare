@@ -3,7 +3,7 @@
     import { Ref, ref } from 'vue';
     import AppRequest from '../../classes/AppRequest';
     import { BaseResponseBody } from '../../classes/BaseResponse';
-    import User from '../../classes/model/User';
+    import { User } from '../../classes/model/User';
     import { paths } from '../router';
     import Loading from './Loading.vue';
     import { RouterLink } from 'vue-router';
@@ -13,6 +13,7 @@
     }>()
 
     const userURL: string = "/api/user"
+    const req: AppRequest = new AppRequest(userURL)
 
     const showForm: Ref<boolean> = ref(false)
     const password: Ref<string> = ref("")
@@ -32,16 +33,17 @@
         }
         loading.value = true
         const token = sessionStorage.getItem("token")
-        const res: AxiosResponse = await AppRequest.delete(
-            userURL,
-            new User(props.username || "", password.value),
-            new AxiosHeaders().setAuthorization(token)
+        const res: AxiosResponse = await req.setAuthorization(token!).delete(
+            {
+                username: props.username,
+                password: password.value
+            }
         )
         const data: BaseResponseBody = res.data
-        feedback.value = data.message + "!"
+        feedback.value = `${data.message}!`
         loading.value = false
         if (!data.error) {
-            setTimeout(signOut, 1500)
+            signOut()
         }
     }
 </script>

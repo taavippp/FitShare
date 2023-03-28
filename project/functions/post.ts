@@ -1,18 +1,15 @@
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
-import PostExerciseDTO from "../classes/dto/PostExerciseDTO";
-import PostExercise from "../classes/model/PostExercise";
-import DataValidator from "../classes/DataValidator";
+import { ServerPostElement } from "../classes/model/ServerPostElement";
+import { Post, PostSchema } from "../classes/model/Post";
+import { Exercise } from "../classes/model/Exercise";
 import { Collection, Db, ObjectId } from "mongodb";
 import { HandlerEvent } from "@netlify/functions";
 import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
-import Exercise from "../classes/model/Exercise";
 import TokenDTO from "../classes/dto/TokenDTO";
 import { JwtPayload } from "jsonwebtoken";
-import Post from "../classes/model/Post";
 
-type BodyPost = { title: string; content: Array<PostExercise> };
-type BodyPostID = { id: string };
+type BodyPost = { title: string; content: Array<ServerPostElement> };
 
 const PER_PAGE: number = 10;
 
@@ -23,13 +20,14 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			if (!query || (!query.id && !query.page)) {
 				return AppResponse.InvalidQuery;
 			}
+
 			if (query.id) {
 				const collection: Collection<Post> =
 					await AppDatabase.collection("post");
-				const post: Post | null = await collection.findOne({
-					_id: query.id,
-				});
 
+				const post: Post | null = await collection.findOne({
+					_id: new ObjectId(query.id),
+				});
 				if (!post) {
 					return AppResponse.BadRequest(
 						"Post with this ID doesn't exist"
@@ -40,6 +38,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					new BaseResponseBody("Found post", false, { post })
 				);
 			}
+
 			if (query.page) {
 				const page: number = Number.parseInt(query.page);
 				if (isNaN(page) || page < 1) {
@@ -77,38 +76,14 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const body: BodyPost = JSON.parse(event.body);
 
+			const { success } = PostSchema.safeParse(body);
+			if (!success) {
+				return AppResponse.InvalidBody;
+			}
+
 			const exerciseIDs: Set<number> = new Set();
-			const content: Array<Array<number | null>> = body.content.map(
-				(pe: PostExercise) => {
-					exerciseIDs.add(pe.eID);
-					return PostExerciseDTO.serialize(pe);
-				}
-			);
-
-			if (body.title.length < 5 || body.title.length > 30) {
-				return AppResponse.BadRequest(
-					"Post title is over limit (5-30 symbols)"
-				);
-			}
-
-			if (content.length < 1 || content.length > 25) {
-				return AppResponse.BadRequest(
-					"Post exercise amount is over limit (1-25)"
-				);
-			}
-
-			if (
-				!DataValidator.isObjectValid(
-					{ title: body.title, content },
-					{
-						title: "string",
-						content: "object",
-						content$1: "object",
-						content$2: "number",
-					}
-				)
-			) {
-				return AppResponse.BadRequest("DataValidator");
+			for (let exercise of body.content) {
+				exerciseIDs.add(exercise[0]);
 			}
 
 			const db: Db = await AppDatabase.connect();
@@ -116,7 +91,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				await AppDatabase.collection("exercise", db);
 
 			const count: number = await exerciseCollection.countDocuments({
-				_id: { $in: Array.from(exerciseIDs) },
+				id: { $in: Array.from(exerciseIDs) },
 			});
 
 			if (count !== exerciseIDs.size) {
@@ -129,12 +104,12 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				36
 			)}`;
 
-			const post: Post = new Post(
-				body.title,
-				content as Array<Array<number>>,
-				id,
-				new ObjectId(payload.id)
-			);
+			const post: Post = {
+				title: body.title,
+				content: body.content,
+				userID: new ObjectId(payload.id),
+				id: id,
+			};
 
 			const postCollection: Collection<Post> =
 				await AppDatabase.collection("post", db);
@@ -160,12 +135,15 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.InvalidBody;
 			}
 
-			const body: BodyPostID = JSON.parse(event.body);
-			if (!DataValidator.isObjectValid(body, { id: "string" })) {
+			const body: Pick<Post, "id"> = JSON.parse(event.body);
+			if (!body.id) {
 				return AppResponse.InvalidBody;
 			}
 
 			const postID: string = body.id;
+			if (postID.length < 9) {
+				return AppResponse.BadRequest("Invalid post ID");
+			}
 
 			const db: Db = await AppDatabase.connect();
 			const commentCollection: Collection<Comment> =
@@ -176,7 +154,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			// should return null if it does not find the post to delete
 			const post: Post | null = (
 				await postCollection.findOneAndDelete({
-					_id: postID,
+					_id: new ObjectId(postID),
 					userID: new ObjectId(userID),
 				})
 			).value;

@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
+import { describe, expect, test } from "vitest";
 
 describe("BaseResponseBody class", () => {
 	test("message property", () => {

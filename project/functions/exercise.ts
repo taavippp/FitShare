@@ -1,50 +1,56 @@
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
-import ExerciseCategory from "../classes/ExerciseCategory";
-import DataValidator from "../classes/DataValidator";
+import { Exercise, ExerciseSchema } from "../classes/model/Exercise";
+import { User, Admin } from "../classes/model/User";
 import { Collection, Db, ObjectId } from "mongodb";
 import { HandlerEvent } from "@netlify/functions";
 import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
-import Exercise from "../classes/model/Exercise";
 import TokenDTO from "../classes/dto/TokenDTO";
-import Admin from "../classes/model/Admin";
 import { JwtPayload } from "jsonwebtoken";
-import User from "../classes/model/User";
-
-const ExerciseCategoryKeys = Object.keys(ExerciseCategory);
-
-type BodyExercise = Omit<Exercise, "_id">;
 
 export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	switch (event.httpMethod) {
 		case "GET": {
 			const query = event.queryStringParameters;
 
-			if (!query || !query.categories) {
-				return AppResponse.InvalidQuery;
-			}
-			const queryCategories: Array<string> = query.categories.split("-");
-			const numCategories: Array<number> = [];
-
-			for (let i = 0; i < queryCategories.length; i++) {
-				const category: string = queryCategories[i].toUpperCase();
-				const index: number = ExerciseCategoryKeys.indexOf(category);
-				if (index === -1) {
-					return new BaseResponse(
-						400,
-						new BaseResponseBody("Invalid category", true)
-					);
-				}
-				numCategories.push(index);
-			}
-
 			const collection: Collection<Exercise> =
 				await AppDatabase.collection("exercise");
-			const exercises: Array<Required<Exercise>> = await collection
+
+			if (!query || !query.IDs) {
+				const exercises: Array<Exercise> = await collection
+					.find(
+						{},
+						{
+							projection: {
+								_id: 0,
+							},
+						}
+					)
+					.sort({ name: "asc" })
+					.toArray();
+				return AppResponse.Success(
+					new BaseResponseBody("All exercises", false, {
+						exercises,
+					})
+				);
+			}
+
+			const exerciseIDs: Array<number> = query.IDs.split("-").map(
+				(num: string) => {
+					return parseInt(num);
+				}
+			);
+
+			for (let ID of exerciseIDs) {
+				if (isNaN(ID)) {
+					return AppResponse.InvalidQuery;
+				}
+			}
+
+			const exercises: Array<Exercise> = await collection
 				.find(
-					{ categories: { $in: numCategories } },
+					{ id: { $in: exerciseIDs } },
 					{
-						// fetches exercises without "category" property as it is unnecessary
 						projection: {
 							category: 0,
 						},
@@ -53,13 +59,9 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				.sort({ name: "asc" })
 				.toArray();
 			return AppResponse.Success(
-				new BaseResponseBody(
-					`${queryCategories.join(", ")} exercises`,
-					false,
-					{
-						exercises,
-					}
-				)
+				new BaseResponseBody("Exercises by ID", false, {
+					exercises,
+				})
 			);
 		}
 		case "POST": {
@@ -67,22 +69,11 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.InvalidBody;
 			}
 
-			const body: BodyExercise = JSON.parse(event.body);
-			if (
-				!DataValidator.isObjectValid(body, {
-					name: "string",
-					categories: "object",
-					categories$1: "number",
-				})
-			) {
-				return AppResponse.InvalidBody;
-			}
+			const body: Exercise = JSON.parse(event.body);
 
-			if (
-				Math.max(...body.categories) > ExerciseCategoryKeys.length ||
-				Math.min(...body.categories) < 0
-			) {
-				return AppResponse.BadRequest("Invalid exercise category");
+			const { success } = ExerciseSchema.safeParse(body);
+			if (!success) {
+				return AppResponse.InvalidBody;
 			}
 
 			const token: string | undefined = event.headers.authorization;
@@ -119,8 +110,11 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			const collection: Collection<Exercise> =
 				await AppDatabase.collection("exercise", db);
 
-			const exercise: Exercise = new Exercise(body.name, body.categories);
-			exercise._id = await collection.countDocuments({}) + 1;
+			const exercise: Exercise = {
+				id: (await collection.countDocuments()) + 1,
+				name: body.name,
+				categories: body.categories,
+			};
 			await collection.insertOne(exercise);
 
 			return AppResponse.Success(

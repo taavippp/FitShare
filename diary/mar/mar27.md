@@ -1,0 +1,5 @@
+# 27. märts
+## Ajakulu: 7h
+Postituse loomise leht tundub valmis olevat, aga eelnevalt tehtud muudatused pakkusid mulle natuke pahandust. Viis, kuidas andmeid valideerin, on küll tore hetkel, aga mõtlen hetkel näiteks Zod'i validaatori kasutusele võtmist. Olen kuulnud, et see on väga mugav tööriist. Seega võib-olla teen taas *backend*'i ümber. Kõlab tülikas, aga tegelikkuses on arvatavasti mul mitmes kohas andmete valideerimisega midagi kahe silma vahele jäänud.
+
+Hiljem otsustasingi Zod'i peale üle minna ja enda validaator kustutada. Töö võttis tohutult aega ja tähendas, et pidin igal pool projekti muutma ja praegu näitab Visual Studio Code, et mul on 36 faili muudetud. Päris palju! Tegelikult ei ole muudatused nii kõvad, aga kuna mu projekt on päris mõistlikult struktrueeritud (minu arust), siis ühte väikest faili muutes muutub ka teine. *Frontend*'i ma veel pole vaadanudki, algul üritan lihtsalt testid korda saada. Testidest rääkides sain nendega peaaegu ilusti hakkama, aga *API_post.test.ts* veel ütleb, et mõnes kohas on vigu.

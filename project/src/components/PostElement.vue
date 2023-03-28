@@ -1,40 +1,41 @@
 <script setup lang="ts">
 import { Ref, ref } from 'vue';
-import Exercise from '../../classes/model/Exercise';
-import PostExercise from '../../classes/model/PostExercise';
+import { Exercise } from '../../classes/model/Exercise';
+import { ClientPostElementExercise } from '../../classes/model/ClientPostElement';
 
 const props = defineProps<{
     editable: boolean;
     exercise: Required<Exercise>;
     exerciseList: Array<Exercise>;
     index: number;
-    setPostExercise: (index: number, pe: PostExercise) => void;
+    setPostExercise: (index: number, exercise: ClientPostElementExercise) => void;
     setEditable: (index: number) => void;
     removeElement: (index: number) => void;
 }>()
 
-const postExercise: Ref<PostExercise> = ref(new PostExercise(
-    props.exercise._id,
-    3,
-    5,
-))
+const postElementExercise: Ref<ClientPostElementExercise> = ref({
+    id: props.exercise.id,
+    name: props.exercise.name,
+    sets: 3,
+    reps: 5,
+})
 
 function onChange(event: Event) {
     const target = event.target as HTMLInputElement
     const value: number = parseInt(target.value)
     switch (target.name) {
         case "exercise":
-            postExercise.value.eID = value
+            postElementExercise.value.id = value
             break;
         case "sets":
-            postExercise.value.sets = value
+            postElementExercise.value.sets = value
             break;
         case "reps":
-            postExercise.value.reps = value
+            postElementExercise.value.reps = value
             break;
     }
-    console.log(postExercise.value)
-    props.setPostExercise(props.index, postExercise.value)
+    console.log(postElementExercise.value)
+    props.setPostExercise(props.index, postElementExercise.value)
 }
 
 </script>
@@ -46,7 +47,11 @@ function onChange(event: Event) {
                 {{ exercise.name }}
             </p>
             <select v-else name="exercise" @change="onChange">
-                <option v-for="(exercise) in exerciseList" :value="exercise._id" :selected="postExercise.eID === exercise._id">
+                <option 
+                v-for="(exercise) in exerciseList" 
+                :value="exercise.id"
+                :selected="postElementExercise.id === exercise.id"
+                >
                     {{ exercise.name }}
                 </option>
             </select>
@@ -61,21 +66,21 @@ function onChange(event: Event) {
         </div>
         <label :for="`sets-${index}`">Sets</label>
         <input type="number"
-        name="sets"
-        :id="`sets-${index}`"
-        @change="onChange"
-        :value="postExercise.sets"
-        min="1"
-        max="25"
+            name="sets"
+            :id="`sets-${index}`"
+            @change="onChange"
+            :value="postElementExercise.sets"
+            min="1"
+            max="25"
         />
         <label :for="`reps-${index}`">Reps</label>
         <input type="number"
-        name="reps"
-        :id="`reps-${index}`"
-        @change="onChange"
-        :value="postExercise.reps"
-        min="1"
-        max="50"
+            name="reps"
+            :id="`reps-${index}`"
+            @change="onChange"
+            :value="postElementExercise.reps"
+            min="1"
+            max="50"
         />
     </div>
 </template>

@@ -4,16 +4,24 @@ import { ref, Ref, watch, toRaw } from 'vue';
 import AppRequest from '../../classes/AppRequest';
 import { BaseResponseBody } from '../../classes/BaseResponse';
 import ExerciseCategory from '../../classes/ExerciseCategory';
-import Exercise from '../../classes/model/Exercise';
+import { Exercise } from '../../classes/model/Exercise';
 import Loading from '../components/Loading.vue';
-import PostExercise from "../../classes/model/PostExercise"
-import PostElement from '../components/PostElement.vue';
-import Post from "../../classes/model/Post"
+import PostElementVue from '../components/PostElement.vue';
+import { Post } from "../../classes/model/Post"
 import { paths } from '../router';
-import PostExerciseDTO from "../../classes/dto/PostExerciseDTO"
+import PostExerciseDTO from "../../classes/dto/PostDTO";
+import { 
+    ClientPostElement,
+    ClientPostElementExercise,
+ClientPostElementSchema
+} from "../../classes/model/ClientPostElement"
+import { ServerPostElement } from '../../classes/model/ServerPostElement';
+import PostDTO from '../../classes/dto/PostDTO';
 
 const exerciseURL: string = "/api/exercise"
 const postURL: string = "/api/post"
+const exerciseReq: AppRequest = new AppRequest(exerciseURL)
+const postReq: AppRequest = new AppRequest(postURL)
 
 const fetched: Ref<boolean> = ref(false)
 const title: Ref<string> = ref("")
@@ -25,12 +33,7 @@ const loading: Ref<boolean> = ref(false)
 const allExercises: Ref<Array<Required<Exercise>>> = ref([])
 const filtered: Ref<Array<Required<Exercise>>> = ref([])
 
-type PostElement = {
-    editable: boolean;
-    exercise: PostExercise;
-}
-
-const postElements: Ref<Array<PostElement>> = ref([])
+const postElements: Ref<Array<ClientPostElement>> = ref([])
 
 watch([allExercises, nameFilter, categoryFilter], () => {
     filtered.value = allExercises.value.filter((exercise) => {
@@ -62,14 +65,7 @@ async function getExercises() {
         return
     }
 
-    const res: AxiosResponse = await AppRequest.get(
-        exerciseURL,
-        {
-            categories: Object.keys(
-                ExerciseCategory
-            ).map((key) => key.toLowerCase()).join("-")
-        }
-    )
+    const res: AxiosResponse = await exerciseReq.get()
     const data: BaseResponseBody = res.data
     if (data.error) {
         feedback.value = data.message
@@ -88,11 +84,12 @@ function addPostElement() {
     postElements.value.push(
         {
             editable: true,
-            exercise: new PostExercise(
-                filtered.value[0]._id,
-                3,
-                5,
-            )
+            exercise: {
+                name: filtered.value[0].name,
+                id: filtered.value[0].id,
+                sets: 3,
+                reps: 5,
+            }
         }
     )
 }
@@ -101,8 +98,8 @@ function setEditable(index: number) {
     postElements.value[index].editable = !postElements.value[index].editable
 }
 
-function setPostExercise(index: number, pe: PostExercise) {
-    postElements.value[index].exercise = pe
+function setPostExercise(index: number, exercise: ClientPostElementExercise) {
+    postElements.value[index].exercise = exercise
 }
 
 function removeElement(index: number) {
@@ -114,57 +111,37 @@ function scrollToTop() {
 }
 
 async function post() {
-    const postExercises: Array<PostExercise> = toRaw(postElements.value).map(
-        (element: PostElement) => {
-            return element.exercise
+    const postExercises: Array<ServerPostElement> = []
+    for (let element of toRaw(postElements.value)) {
+        const { success } = ClientPostElementSchema.safeParse(element);
+        if (!success) {
+            feedback.value = "Invalid values."
         }
-    )
+        postExercises.push(PostDTO.serializeExercise(element.exercise))
+    }
 
-    if (postExercises.length < 1 || postExercises.length > 25) {
-        feedback.value = "A workout can have 1-25 different exercises."
+    if (postExercises.length < 1 || postExercises.length > 32) {
+        feedback.value = "A workout can have 1-32 exercises."
         scrollToTop()
         return
     }
 
-    let hasInvalidData: boolean = false
-    const serialized: Array<Array<number | null>> = postExercises.map((postExercise: PostExercise) => {
-        const data: Array<number | null> = PostExerciseDTO.serialize(postExercise)
-        if (data.includes(null)) {
-            hasInvalidData = true
-        }
-        return data
-    })
-    if (hasInvalidData) {
-            feedback.value = "Exercises must have 1-25 sets and 1-50 reps."
-            scrollToTop()
-            return
-    }
-
-    if (title.value.length < 5 || title.value.length > 30) {
-        feedback.value = "Title must be 5-30 symbols long."
+    if (title.value.length < 4 || title.value.length > 64) {
+        feedback.value = "Title must be 4-64 symbols long."
         scrollToTop()
         return
     }
 
     loading.value = true
 
-    const post: Post = new Post(
-        title.value,
-        serialized as Array<Array<number>>
-    )
+    const post: Post = {
+        title: title.value,
+        content: postExercises,
+    }
 
     const token: string | null = sessionStorage.getItem("token")
 
-    if (!token) {
-        window.location.assign(paths.home)
-        return
-    }
-
-    const res: AxiosResponse = await AppRequest.post(
-        postURL,
-        post,
-        new AxiosHeaders().setAuthorization(token)
-    )
+    const res: AxiosResponse = await postReq.setAuthorization(token!).post(post)
     const data: BaseResponseBody = res.data
 
     loading.value = false
@@ -174,6 +151,7 @@ async function post() {
         return
     }
     if (data.object) {
+        console.log("NAVIGATE TO POST PAGE INSTEAD")
         feedback.value = `Post ID: ${data.object.id}`
     }
 }
@@ -193,15 +171,20 @@ async function post() {
             <label for="categoryFilter">Category</label>
             <select id="categoryFilter" v-model="categoryFilter">
                 <option value="0" selected>all</option>
-                <option v-for="(value, key) in ExerciseCategory" :value="value">{{ (key as string).toLowerCase() }}</option>
+                <option
+                v-for="(value, key) in ExerciseCategory"
+                :value="value"
+                >
+                {{ (key as string).toLowerCase() }}
+                </option>
             </select>
         </div>
         <div class="PostElements">
-            <PostElement
+            <PostElementVue
             v-for="(element, index) in postElements"
             :exercise="
                 allExercises.find((exercise) => {
-                    return element.exercise.eID === exercise._id
+                    return element.exercise.id === exercise.id
                 })!
             "
             :setPostExercise="setPostExercise"

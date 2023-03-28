@@ -1,60 +1,44 @@
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
-import DataValidator from "../classes/DataValidator";
 import { HandlerEvent } from "@netlify/functions";
 import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
-import { Collection, ObjectId } from "mongodb";
+import { Collection, ObjectId, WithId } from "mongodb";
 import TokenDTO from "../classes/dto/TokenDTO";
-import UserDTO from "../classes/dto/UserDTO";
+import { User, UserSchema } from "../classes/model/User";
 import { JwtPayload } from "jsonwebtoken";
-import User from "../classes/model/User";
 import bcrypt from "bcrypt";
-
-type BodyUser = Omit<User, "_id">;
 
 export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	if (!event.body) {
 		return AppResponse.InvalidBody;
 	}
 
-	const body: BodyUser = JSON.parse(event.body);
-	if (
-		!DataValidator.isObjectValid(body, {
-			username: "string",
-			password: "string",
-		})
-	) {
+	const reqUser: User = JSON.parse(event.body);
+	const { success } = UserSchema.safeParse(reqUser);
+
+	if (!success) {
 		return AppResponse.InvalidBody;
-	}
-
-	const reqUser: User | null = UserDTO.create(body.username, body.password);
-
-	if (!reqUser) {
-		return AppResponse.BadRequest(
-			"Username must be 3-15 symbols (A-Z, a-z, 0-9, _) " +
-				"and password must be at least 8 symbols"
-		);
 	}
 
 	switch (event.httpMethod) {
 		case "POST": {
-			const isLogin: string | undefined = event.headers["x-login"];
-			if (!isLogin || (isLogin !== "true" && isLogin !== "false")) {
+			const loggingIn: string | undefined = event.headers["x-login"];
+			if (!loggingIn || (loggingIn !== "true" && loggingIn !== "false")) {
 				return AppResponse.BadRequest(
 					"Request is missing X-Login header"
 				);
 			}
 
-			if (isLogin === "true") {
+			if (loggingIn === "true") {
 				const collection: Collection<User> =
 					await AppDatabase.collection("user");
-				const dbUser: Required<User> | null = await collection.findOne({
+				const dbUser: WithId<User> | null = await collection.findOne({
 					username: reqUser.username,
 				});
 
 				if (!dbUser) {
 					return AppResponse.BadRequest(
-						`No user with that username exists`
+						"No user with that username exists"
 					);
 				}
 
@@ -103,18 +87,18 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 		}
 		case "DELETE": {
 			const token: string | undefined = event.headers.authorization;
-			if (token === undefined) {
+			if (!token) {
 				return AppResponse.MissingAuth;
 			}
 
 			const payload: JwtPayload | null = TokenDTO.deserialize(token);
-			// also used to return 500 error with an unknown jwt error
 			if (!payload) {
 				return AppResponse.UnreadableToken;
 			}
+
 			if (
-				reqUser.username !== payload["username"] ||
-				!ObjectId.isValid(payload["id"])
+				reqUser.username !== payload.username ||
+				!ObjectId.isValid(payload.id)
 			) {
 				return AppResponse.WrongToken;
 			}
@@ -122,10 +106,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			const collection: Collection<User> = await AppDatabase.collection(
 				"user"
 			);
-			const dbUser: Required<User> | null = await collection.findOne({
+
+			const dbUser: User | null = await collection.findOne({
 				username: reqUser.username,
 			});
-
 			if (!dbUser) {
 				return AppResponse.BadRequest("User doesn't exist");
 			}

@@ -1,13 +1,12 @@
 import { ObjectId } from "mongodb";
+import { z } from "zod";
 
-export default class Comment {
-	postID: string;
-	userID: ObjectId;
-	text: string;
+export const CommentSchema = z.object({
+	postID: z.string(),
+	userID: z.custom<ObjectId>((userID) => {
+		return ObjectId.isValid(userID as string);
+	}),
+	text: z.string().max(128),
+});
 
-	constructor(postID: string, userID: ObjectId, text: string) {
-		this.postID = postID;
-		this.userID = userID;
-		this.text = text;
-	}
-}
+export type Comment = z.infer<typeof CommentSchema>;

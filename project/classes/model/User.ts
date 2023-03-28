@@ -1,13 +1,15 @@
-import CountedModel from "../CountedModel";
-import { ObjectId } from "mongodb";
+import { WithId } from "mongodb";
+import { z } from "zod";
 
-export default class User implements CountedModel {
-	_id?: ObjectId;
-	username: string;
-	password: string;
+export const UserSchema = z.object({
+	username: z
+		.string()
+		.min(3)
+		.max(15)
+		.regex(/^[a-zA-Z]+$/),
+	password: z.string().min(8),
+});
 
-	constructor(username: string, password: string) {
-		this.username = username;
-		this.password = password;
-	}
-}
+export type User = z.infer<typeof UserSchema>;
+
+export type Admin = WithId<Omit<User, "password">>;

@@ -6,10 +6,12 @@ import { paths } from '../router';
 import ExerciseCategory from "../../classes/ExerciseCategory"
 import { ref, Ref, toRaw } from 'vue';
 import Loading from '../components/Loading.vue';
-import Exercise from "../../classes/model/Exercise"
+import { Exercise } from "../../classes/model/Exercise"
 
 const isAdminURL: string = "/api/is_admin"
 const exerciseURL: string = "/api/exercise"
+const isAdminReq: AppRequest = new AppRequest(isAdminURL)
+const exerciseReq: AppRequest = new AppRequest(exerciseURL)
 
 const verified: Ref<boolean> = ref(false)
 const name: Ref<string> = ref("")
@@ -22,11 +24,7 @@ async function verifyAdmin() {
         return
     }
     const token: string | null = sessionStorage.getItem("token")
-    const res: AxiosResponse = await AppRequest.get(
-        isAdminURL,
-        {},
-        new AxiosHeaders().setAuthorization(token)
-    )
+    const res: AxiosResponse = await isAdminReq.setAuthorization(token!).get()
     const data: BaseResponseBody = res.data
     if (data.error) {
         window.location.assign(paths.home)
@@ -49,15 +47,11 @@ function addCategory(event: MouseEvent) {
 async function submitExercise() {
     loading.value = true
     const values: Array<number> = toRaw(categories.value)
-    const token = sessionStorage.getItem("token")
-    const res = await AppRequest.post(
-        exerciseURL,
-        new Exercise(
-            name.value,
-            values
-        ),
-        new AxiosHeaders().setAuthorization(token)
-    )
+    const token: string | null = sessionStorage.getItem("token")
+    const res = await exerciseReq.setAuthorization(token!).post({
+            name: name.value,
+            categories: values
+    })
     const data: BaseResponseBody = res.data
     feedback.value = data.message
     categories.value = []

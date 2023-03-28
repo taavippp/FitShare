@@ -1,12 +1,12 @@
-import CountedModel from "../CountedModel";
+import { z } from "zod";
+import ExerciseCategory from "../ExerciseCategory";
 
-export default class Exercise implements CountedModel {
-	_id?: number;
-	name: string;
-	categories: Array<number>;
+export const ExerciseSchema = z.object({
+	id: z.number().optional(),
+	name: z.string().min(3),
+	categories: z
+		.array(z.number().min(1).max(Object.values(ExerciseCategory).length))
+		.min(1),
+});
 
-	constructor(name: string, categories: Array<number>) {
-		this.name = name;
-		this.categories = categories;
-	}
-}
+export type Exercise = z.infer<typeof ExerciseSchema>;
