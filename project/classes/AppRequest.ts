@@ -19,6 +19,11 @@ export default class AppRequest {
 		return this;
 	}
 
+	removeHeader(header: string): AppRequest {
+		this.headers.delete(header);
+		return this;
+	}
+
 	setAuthorization(auth: string): AppRequest {
 		this.headers.setAuthorization(auth);
 		return this;

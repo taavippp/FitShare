@@ -13,8 +13,8 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 		case "GET": {
 			const query = event.queryStringParameters;
 
-			const collection: Collection<Exercise> =
-				await AppDatabase.collection("exercise");
+			const db: AppDatabase = await new AppDatabase().connect();
+			const collection: Collection<Exercise> = db.collection("exercise");
 
 			if (!query || !query.IDs) {
 				const exercises: Array<Exercise> = await collection
@@ -28,6 +28,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					)
 					.sort({ name: "asc" })
 					.toArray();
+				await db.close();
 				return AppResponse.Success(
 					new BaseResponseBody("All exercises", false, {
 						exercises,
@@ -43,6 +44,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			for (let ID of exerciseIDs) {
 				if (isNaN(ID)) {
+					await db.close();
 					return AppResponse.InvalidQuery;
 				}
 			}
@@ -58,6 +60,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				)
 				.sort({ name: "asc" })
 				.toArray();
+			await db.close();
 			return AppResponse.Success(
 				new BaseResponseBody("Exercises by ID", false, {
 					exercises,
@@ -86,29 +89,29 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.UnreadableToken;
 			}
 
-			const db: Db = await AppDatabase.connect();
+			const db: AppDatabase = await new AppDatabase().connect();
 			const userCollection: Collection<User> =
-				await AppDatabase.collection("user", db);
+				db.collection("user");
 			const user: User | null = await userCollection.findOne({
 				username: payload.username,
 			});
 
 			if (!user) {
+				await db.close();
 				return AppResponse.BadRequest("User doesn't exist");
 			}
 
-			const adminCollection: Collection<Admin> =
-				await AppDatabase.collection("admin", db);
+			const adminCollection: Collection<Admin> = db.collection("admin");
 			const admin: Admin | null = await adminCollection.findOne({
 				username: payload.username,
 			});
 
 			if (!admin || !ObjectId.isValid(payload.id)) {
+				await db.close();
 				return AppResponse.Forbidden("Not admin");
 			}
 
-			const collection: Collection<Exercise> =
-				await AppDatabase.collection("exercise", db);
+			const collection: Collection<Exercise> = db.collection("exercise");
 
 			const exercise: Exercise = {
 				id: (await collection.countDocuments()) + 1,
@@ -116,6 +119,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				categories: body.categories,
 			};
 			await collection.insertOne(exercise);
+			await db.close();
 
 			return AppResponse.Success(
 				new BaseResponseBody(`Inserted ${exercise.name}`)

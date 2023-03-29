@@ -6,6 +6,8 @@ const ExerciseCategory: { [name: string]: number } = {
 	CARDIO: 4,
 	STRENGTH: 5,
 	HYPERTROPHY: 6,
+	ISOMETRIC: 7,
+	CORE: 8,
 };
 
 export default ExerciseCategory;

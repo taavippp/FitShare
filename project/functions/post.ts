@@ -1,8 +1,8 @@
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 import { ServerPostElement } from "../classes/model/ServerPostElement";
-import { Post, PostSchema } from "../classes/model/Post";
+import { Post, PostIDSchema, PostSchema } from "../classes/model/Post";
 import { Exercise } from "../classes/model/Exercise";
-import { Collection, Db, ObjectId } from "mongodb";
+import { Collection, Db, ObjectId, WithId } from "mongodb";
 import { HandlerEvent } from "@netlify/functions";
 import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
@@ -22,12 +22,19 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			}
 
 			if (query.id) {
-				const collection: Collection<Post> =
-					await AppDatabase.collection("post");
+				const { success } = PostIDSchema.safeParse(query.id);
+				if (!success) {
+					return AppResponse.BadRequest("Invalid post ID");
+				}
 
-				const post: Post | null = await collection.findOne({
-					_id: new ObjectId(query.id),
+				const db: AppDatabase = await new AppDatabase().connect();
+				const collection: Collection<Required<Post>> =
+					db.collection("post");
+
+				const post: Required<Post> | null = await collection.findOne({
+					id: query.id,
 				});
+				await db.close();
 				if (!post) {
 					return AppResponse.BadRequest(
 						"Post with this ID doesn't exist"
@@ -45,14 +52,15 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					return AppResponse.InvalidQuery;
 				}
 
-				const collection: Collection<Post> =
-					await AppDatabase.collection("post");
+				const db: AppDatabase = await new AppDatabase().connect();
+				const collection: Collection<Post> = db.collection("post");
 				const posts: Array<Post> = await collection
 					.find()
-					.sort({ timestamp: "desc", _id: "asc" })
-					.skip(page - 1 * PER_PAGE)
+					.sort({ timestamp: "desc", id: "asc" })
+					.skip((page - 1) * PER_PAGE)
 					.limit(PER_PAGE)
 					.toArray();
+				await db.close();
 
 				return AppResponse.Success(
 					new BaseResponseBody("Posts", false, { posts })
@@ -86,15 +94,16 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				exerciseIDs.add(exercise[0]);
 			}
 
-			const db: Db = await AppDatabase.connect();
+			const db: AppDatabase = await new AppDatabase().connect();
 			const exerciseCollection: Collection<Required<Exercise>> =
-				await AppDatabase.collection("exercise", db);
+				db.collection("exercise");
 
 			const count: number = await exerciseCollection.countDocuments({
 				id: { $in: Array.from(exerciseIDs) },
 			});
 
 			if (count !== exerciseIDs.size) {
+				await db.close();
 				return AppResponse.BadRequest("Invalid exercise ID");
 			}
 
@@ -111,10 +120,10 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				id: id,
 			};
 
-			const postCollection: Collection<Post> =
-				await AppDatabase.collection("post", db);
+			const postCollection: Collection<Post> = db.collection("post");
 
 			await postCollection.insertOne(post);
+			await db.close();
 			return AppResponse.Success(
 				new BaseResponseBody(`Post created`, false, { id })
 			);
@@ -141,31 +150,34 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			}
 
 			const postID: string = body.id;
-			if (postID.length < 9) {
+
+			const { success } = PostIDSchema.safeParse(postID);
+			if (!success) {
 				return AppResponse.BadRequest("Invalid post ID");
 			}
 
-			const db: Db = await AppDatabase.connect();
+			const db: AppDatabase = await new AppDatabase().connect();
 			const commentCollection: Collection<Comment> =
-				await AppDatabase.collection("comment", db);
-			const postCollection: Collection<Post> =
-				await AppDatabase.collection("post", db);
+				db.collection("comment");
+			const postCollection: Collection<Post> = db.collection("post");
 
 			// should return null if it does not find the post to delete
 			const post: Post | null = (
 				await postCollection.findOneAndDelete({
-					_id: new ObjectId(postID),
+					id: postID,
 					userID: new ObjectId(userID),
 				})
 			).value;
 
 			if (!post) {
+				await db.close();
 				return AppResponse.BadRequest(
 					"Post with this ID doesn't exist or isn't made by this user"
 				);
 			}
 
 			await commentCollection.deleteMany({ postID });
+			await db.close();
 
 			return AppResponse.Success(
 				new BaseResponseBody("Post and its comments deleted")

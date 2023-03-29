@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AxiosHeaders, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { ref, Ref, watch, toRaw } from 'vue';
 import AppRequest from '../../classes/AppRequest';
 import { BaseResponseBody } from '../../classes/BaseResponse';
@@ -9,7 +9,6 @@ import Loading from '../components/Loading.vue';
 import PostElementVue from '../components/PostElement.vue';
 import { Post } from "../../classes/model/Post"
 import { paths } from '../router';
-import PostExerciseDTO from "../../classes/dto/PostDTO";
 import { 
     ClientPostElement,
     ClientPostElementExercise,
@@ -76,6 +75,8 @@ async function getExercises() {
         fetched.value = true
     }
 }
+
+await getExercises()
 
 function addPostElement() {
     if (postElements.value.length === 25) {
@@ -157,7 +158,7 @@ async function post() {
 }
 </script>
 <template>
-    <Loading v-if="!fetched || loading" @vnode-mounted="getExercises"/>
+    <Loading v-if="!fetched || loading"/>
     <h2 v-else-if="!fetched && feedback">{{ feedback }}</h2>
     <div class="CreatePage" v-else>
         <h3 v-if="feedback">{{ feedback }}</h3>

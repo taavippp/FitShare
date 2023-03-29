@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { AxiosHeaders, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import AppRequest from '../../classes/AppRequest';
 import { BaseResponseBody } from '../../classes/BaseResponse'
 import { paths } from '../router';
 import ExerciseCategory from "../../classes/ExerciseCategory"
 import { ref, Ref, toRaw } from 'vue';
 import Loading from '../components/Loading.vue';
-import { Exercise } from "../../classes/model/Exercise"
+import { Exercise } from '../../classes/model/Exercise';
 
 const isAdminURL: string = "/api/is_admin"
 const exerciseURL: string = "/api/exercise"
@@ -33,6 +33,8 @@ async function verifyAdmin() {
     verified.value = true
 }
 
+await verifyAdmin();
+
 function addCategory(event: MouseEvent) {
     const target: HTMLInputElement = event.target as HTMLInputElement
     const value: number = Number(target.value)
@@ -48,10 +50,11 @@ async function submitExercise() {
     loading.value = true
     const values: Array<number> = toRaw(categories.value)
     const token: string | null = sessionStorage.getItem("token")
-    const res = await exerciseReq.setAuthorization(token!).post({
-            name: name.value,
-            categories: values
-    })
+    const exercise: Exercise = {
+        name: name.value,
+        categories: values
+    }
+    const res = await exerciseReq.setAuthorization(token!).post(exercise)
     const data: BaseResponseBody = res.data
     feedback.value = data.message
     categories.value = []
@@ -59,7 +62,7 @@ async function submitExercise() {
 }
 </script>
 <template>
-    <Loading v-if="!verified || loading" @vnode-mounted="verifyAdmin"/>
+    <Loading v-if="!verified || loading"/>
     <div v-else class="Admin">
         <h2>Insert new exercises</h2>
         <h4 v-show="feedback">{{ feedback }}</h4>

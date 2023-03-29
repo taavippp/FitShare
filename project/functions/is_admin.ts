@@ -5,7 +5,7 @@ import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
 import TokenDTO from "../classes/dto/TokenDTO";
 import { JwtPayload } from "jsonwebtoken";
-import { User, Admin } from "../classes/model/User";
+import { Admin } from "../classes/model/User";
 
 export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 	switch (event.httpMethod) {
@@ -20,11 +20,12 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.UnreadableToken;
 			}
 
-			const adminCollection: Collection<Omit<User, "password">> =
-				await AppDatabase.collection("admin");
+			const db: AppDatabase = await new AppDatabase().connect();
+			const adminCollection: Collection<Admin> = db.collection("admin");
 			const admin: Admin | null = await adminCollection.findOne({
 				username: payload.username,
 			});
+			await db.close();
 
 			if (!admin || !ObjectId.isValid(payload.id)) {
 				return AppResponse.Forbidden("Not admin");

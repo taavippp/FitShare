@@ -30,11 +30,12 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			}
 
 			if (loggingIn === "true") {
-				const collection: Collection<User> =
-					await AppDatabase.collection("user");
+				const db: AppDatabase = await new AppDatabase().connect();
+				const collection: Collection<User> = db.collection("user");
 				const dbUser: WithId<User> | null = await collection.findOne({
 					username: reqUser.username,
 				});
+				await db.close();
 
 				if (!dbUser) {
 					return AppResponse.BadRequest(
@@ -63,23 +64,26 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					new BaseResponseBody("Logged in", false, { token })
 				);
 			} else {
-				const collection: Collection<User> =
-					await AppDatabase.collection("user");
+				const db: AppDatabase = await new AppDatabase().connect();
+				const collection: Collection<User> = db.collection("user");
 				const dbUser: User | null = await collection.findOne({
 					username: reqUser.username,
 				});
 
 				if (dbUser) {
+					await db.close();
 					return AppResponse.BadRequest("User already exists");
 				}
 
 				try {
 					reqUser.password = await bcrypt.hash(reqUser.password, 10);
-					collection.insertOne(reqUser);
+					await collection.insertOne(reqUser);
 				} catch (error) {
+					await db.close();
 					return AppResponse.ServerError(error);
 				}
-
+				
+				await db.close();
 				return AppResponse.Success(
 					new BaseResponseBody("User registered")
 				);
@@ -103,14 +107,15 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				return AppResponse.WrongToken;
 			}
 
-			const collection: Collection<User> = await AppDatabase.collection(
-				"user"
-			);
+			const db: AppDatabase = await new AppDatabase().connect();
+			const collection: Collection<User> = db.collection("user");
 
 			const dbUser: User | null = await collection.findOne({
 				username: reqUser.username,
 			});
+			
 			if (!dbUser) {
+				await db.close();
 				return AppResponse.BadRequest("User doesn't exist");
 			}
 
@@ -120,13 +125,16 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					dbUser.password
 				);
 				if (!match) {
+					await db.close();
 					return AppResponse.BadRequest("Wrong password");
 				}
 			} catch (error) {
+				await db.close();
 				return AppResponse.ServerError(error);
 			}
 
-			collection.deleteOne({ username: reqUser.username });
+			await collection.deleteOne({ username: reqUser.username });
+			await db.close();
 			return AppResponse.Success(new BaseResponseBody("User deleted"));
 		}
 	}

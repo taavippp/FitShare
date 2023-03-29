@@ -158,7 +158,7 @@ describe(
 		});
 
 		test("DELETE method", async () => {
-			res = await postReq.delete();
+			res = await postReq.removeHeader("authorization").delete();
 			data = res.data;
 			expect(data.error).toBeTruthy();
 			expect(data.message).toStrictEqual("Missing authorization");
@@ -178,11 +178,16 @@ describe(
 			res = await postReq.setAuthorization(token).delete({ id: true });
 			data = res.data;
 			expect(data.error).toBeTruthy();
-			expect(data.message).toStrictEqual(
-				"Body does not match expected format"
-			);
+			expect(data.message).toStrictEqual("Invalid post ID");
 
 			res = await postReq.setAuthorization(token).delete({ id: "12345" });
+			data = res.data;
+			expect(data.error).toBeTruthy();
+			expect(data.message).toStrictEqual("Invalid post ID");
+
+			res = await postReq
+				.setAuthorization(token)
+				.delete({ id: "_12345678" });
 			data = res.data;
 			expect(data.error).toBeTruthy();
 			expect(data.message).toStrictEqual(

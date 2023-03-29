@@ -1,8 +1,9 @@
+import { PostIDSchema } from "./Post";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 export const CommentSchema = z.object({
-	postID: z.string(),
+	postID: PostIDSchema,
 	userID: z.custom<ObjectId>((userID) => {
 		return ObjectId.isValid(userID as string);
 	}),
