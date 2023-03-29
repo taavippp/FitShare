@@ -24,7 +24,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			if (query.id) {
 				const { success } = PostIDSchema.safeParse(query.id);
 				if (!success) {
-					return AppResponse.BadRequest("Invalid post ID");
+					return AppResponse.InvalidPostID
 				}
 
 				const db: AppDatabase = await new AppDatabase().connect();
@@ -109,15 +109,15 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			// Post ID format: random integer 0-35 + date.now()
 			const randi: number = Math.round(Math.random() * 35);
-			const id: string = `${randi.toString(36)}${Date.now().toString(
-				36
-			)}`;
+			const now: number = Date.now();
+			const id: string = `${randi.toString(36)}${now.toString(36)}`;
 
 			const post: Post = {
 				title: body.title,
 				content: body.content,
 				userID: new ObjectId(payload.id),
 				id: id,
+				timestamp: now,
 			};
 
 			const postCollection: Collection<Post> = db.collection("post");
@@ -153,7 +153,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const { success } = PostIDSchema.safeParse(postID);
 			if (!success) {
-				return AppResponse.BadRequest("Invalid post ID");
+				return AppResponse.InvalidPostID
 			}
 
 			const db: AppDatabase = await new AppDatabase().connect();

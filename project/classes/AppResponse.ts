@@ -41,6 +41,11 @@ export default class AppResponse {
 		new BaseResponseBody("Invalid HTTP method", true)
 	);
 
+	static InvalidPostID: BaseResponse = new BaseResponse(
+		HTTP.BadRequest,
+		new BaseResponseBody("Invalid post ID", true)
+	);
+
 	static ServerError = function (error: Error): BaseResponse {
 		return new BaseResponse(
 			HTTP.InternalServerError,

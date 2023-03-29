@@ -7,7 +7,8 @@ export const CommentSchema = z.object({
 	userID: z.custom<ObjectId>((userID) => {
 		return ObjectId.isValid(userID as string);
 	}),
-	text: z.string().max(128),
+	text: z.string().min(1).max(128),
+	timestamp: z.number().default(Date.now()).optional(),
 });
 
-export type Comment = z.infer<typeof CommentSchema>;
+export type AppComment = z.infer<typeof CommentSchema>;
