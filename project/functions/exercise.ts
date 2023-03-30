@@ -90,17 +90,6 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			}
 
 			const db: AppDatabase = await new AppDatabase().connect();
-			const userCollection: Collection<User> =
-				db.collection("user");
-			const user: User | null = await userCollection.findOne({
-				username: payload.username,
-			});
-
-			if (!user) {
-				await db.close();
-				return AppResponse.BadRequest("User doesn't exist");
-			}
-
 			const adminCollection: Collection<Admin> = db.collection("admin");
 			const admin: Admin | null = await adminCollection.findOne({
 				username: payload.username,

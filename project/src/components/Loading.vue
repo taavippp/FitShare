@@ -1,3 +1,6 @@
+<script setup lang="ts">
+    console.log("Loading instance!")
+</script>
 <template>
     <div>
         <img src="/loading.gif" alt="Loading animation">

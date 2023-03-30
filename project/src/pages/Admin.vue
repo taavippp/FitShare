@@ -20,11 +20,16 @@ const loading: Ref<boolean> = ref(false)
 const feedback: Ref<string> = ref("")
 
 async function verifyAdmin() {
+    verified.value = false
     if (verified.value) {
         return
     }
     const token: string | null = sessionStorage.getItem("token")
-    const res: AxiosResponse = await isAdminReq.setAuthorization(token!).get()
+    if (!token) {
+        window.location.assign(paths.home)
+        return
+    }
+    const res: AxiosResponse = await isAdminReq.setAuthorization(token).get()
     const data: BaseResponseBody = res.data
     if (data.error) {
         window.location.assign(paths.home)

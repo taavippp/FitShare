@@ -34,7 +34,6 @@ function onChange(event: Event) {
             postElementExercise.value.reps = value
             break;
     }
-    console.log(postElementExercise.value)
     props.setPostExercise(props.index, postElementExercise.value)
 }
 

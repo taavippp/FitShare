@@ -170,7 +170,7 @@ async function post() {
             <label for="nameFilter">Name</label>
             <input type="text" id="nameFilter" v-model="nameFilter">
             <label for="categoryFilter">Category</label>
-            <select id="categoryFilter" v-model="categoryFilter">
+            <select id="categoryFilter" v-model.number="categoryFilter">
                 <option value="0" selected>all</option>
                 <option
                 v-for="(value, key) in ExerciseCategory"

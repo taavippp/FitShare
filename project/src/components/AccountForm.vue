@@ -1,11 +1,11 @@
 <script setup lang="ts">
-    import { ref, Ref } from 'vue';
+    import { BaseResponseBody } from "../../classes/BaseResponse"
     import { User, UserSchema } from "@/../../classes/model/User"
     import AppRequest from "@/../../classes/AppRequest"
-    import { BaseResponseBody } from "../../classes/BaseResponse"
-    import { AxiosHeaders, AxiosResponse } from 'axios';
-    import { paths } from '../router';
     import Loading from '../components/Loading.vue';
+    import { AxiosResponse } from 'axios';
+    import { paths } from '../router';
+    import { ref, Ref } from 'vue';
 
     const URL: string = "/api/user"
     const req: AppRequest = new AppRequest(URL)
@@ -78,11 +78,11 @@
 </script>
 <template>
     <Loading v-if="loading"/>
-    <div v-else class="form">
+    <div v-else class="Form">
         <h3 v-if="feedback">{{ feedback }}</h3>
         <h2>Sign {{ isSigningIn ? `in` : `up` }}</h2>
         <button @click="setIsSigningIn">Go to sign {{ isSigningIn ? `up` : `in` }}</button>
-        <div class="formBox">
+        <div class="FormBox">
             <label for="username">Username</label>
             <input id="username" type="text" v-model="username">
             <label for="password">Password</label>
@@ -105,7 +105,7 @@
         padding: 0;
     }
 
-    .form {
+    .Form {
         width: 100vw;
         height: fit-content;
 
@@ -115,7 +115,7 @@
         justify-content: center;
     }
     
-    .formBox {
+    .FormBox {
         border: 2px solid var(--color_border);
         display: inherit;
         flex-direction: column;
