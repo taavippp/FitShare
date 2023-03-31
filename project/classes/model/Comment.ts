@@ -1,4 +1,4 @@
-import { PostIDSchema } from "./Post";
+import { PostIDSchema } from "./PostID";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 

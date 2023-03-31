@@ -29,11 +29,15 @@ const routes: { [name: string]: RouteRecordRaw } = {
 		component: HomePage,
 	},
 	train: {
-		path: `${paths.train}/:postID?`,
+		path: `${paths.train}/:postID`,
 		component: ErrorPage,
 	},
-	browse: {
-		path: `${paths.browse}/:postID?`,
+	browseByPage: {
+		path: `${paths.browse}/page/:page`,
+		component: BrowsePage,
+	},
+	browseByID: {
+		path: `${paths.browse}/:postID`,
 		component: BrowsePage,
 	},
 	account: {
@@ -60,7 +64,8 @@ const router: Router = createRouter({
 	routes: [
 		routes.home,
 		routes.train,
-		routes.browse,
+		routes.browseByPage,
+		routes.browseByID,
 		routes.account,
 		routes.create,
 		routes.admin,

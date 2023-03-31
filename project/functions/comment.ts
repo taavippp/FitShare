@@ -6,7 +6,8 @@ import AppResponse from "../classes/AppResponse";
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 import TokenDTO from "../classes/dto/TokenDTO";
 import { AppComment, CommentSchema } from "../classes/model/Comment";
-import { Post, PostIDSchema } from "../classes/model/Post";
+import { Post } from "../classes/model/Post";
+import { PostIDSchema } from "../classes/model/PostID";
 
 type BodyComment = { text: string; postID: string };
 

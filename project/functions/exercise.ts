@@ -54,7 +54,8 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					{ id: { $in: exerciseIDs } },
 					{
 						projection: {
-							category: 0,
+							_id: false,
+							categories: false,
 						},
 					}
 				)

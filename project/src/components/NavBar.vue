@@ -16,7 +16,7 @@
         <span class="right">
             <RouterLink :to="paths.create" v-if="loggedIn"><button>+</button></RouterLink>
             <RouterLink :to="paths.train"><button>Train</button></RouterLink>
-            <RouterLink :to="paths.browse"><button>Browse</button></RouterLink>
+            <RouterLink :to="`${paths.browse}/page/1`"><button>Browse</button></RouterLink>
             <RouterLink :to="paths.account"><button class="Account" :class="loggedIn ? `LoggedIn` : ``">{{ username ?? "Account" }}</button></RouterLink>
         </span>
     </nav>

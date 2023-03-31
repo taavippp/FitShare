@@ -1,11 +1,10 @@
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 import { ServerPostElementSchema } from "./ServerPostElement";
-
-export const PostIDSchema = z.string().min(9).optional();
+import { PostIDSchema } from "./PostID";
 
 export const PostSchema = z.object({
-	id: PostIDSchema,
+	id: PostIDSchema.optional(),
 	title: z.string().min(4).max(64),
 	content: z.array(ServerPostElementSchema).min(1).max(32),
 	userID: z

@@ -20,7 +20,6 @@ const loading: Ref<boolean> = ref(false)
 const feedback: Ref<string> = ref("")
 
 async function verifyAdmin() {
-    verified.value = false
     if (verified.value) {
         return
     }
@@ -37,8 +36,6 @@ async function verifyAdmin() {
     }
     verified.value = true
 }
-
-await verifyAdmin();
 
 function addCategory(event: MouseEvent) {
     const target: HTMLInputElement = event.target as HTMLInputElement
@@ -67,7 +64,7 @@ async function submitExercise() {
 }
 </script>
 <template>
-    <Loading v-if="!verified || loading"/>
+    <Loading v-if="!verified || loading" @vnode-before-mount="verifyAdmin"/>
     <div v-else class="Admin">
         <h2>Insert new exercises</h2>
         <h4 v-show="feedback">{{ feedback }}</h4>

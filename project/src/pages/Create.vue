@@ -6,13 +6,13 @@ import { BaseResponseBody } from '../../classes/BaseResponse';
 import ExerciseCategory from '../../classes/ExerciseCategory';
 import { Exercise } from '../../classes/model/Exercise';
 import Loading from '../components/Loading.vue';
-import PostElementVue from '../components/PostElement.vue';
+import CreatePostElement from '../components/CreatePostElement.vue';
 import { Post } from "../../classes/model/Post"
 import { paths } from '../router';
 import { 
     ClientPostElement,
     ClientPostElementExercise,
-ClientPostElementSchema
+    ClientPostElementSchema
 } from "../../classes/model/ClientPostElement"
 import { ServerPostElement } from '../../classes/model/ServerPostElement';
 import PostDTO from '../../classes/dto/PostDTO';
@@ -75,8 +75,6 @@ async function getExercises() {
         fetched.value = true
     }
 }
-
-await getExercises()
 
 function addPostElement() {
     if (postElements.value.length === 25) {
@@ -152,13 +150,13 @@ async function post() {
         return
     }
     if (data.object) {
-        console.log("NAVIGATE TO POST PAGE INSTEAD")
-        feedback.value = `Post ID: ${data.object.id}`
+        window.location.assign(`${paths.browse}/${data.object.id}`)
+        return
     }
 }
 </script>
 <template>
-    <Loading v-if="!fetched || loading"/>
+    <Loading v-if="!fetched || loading" @vnode-before-mount="getExercises"/>
     <h2 v-else-if="!fetched && feedback">{{ feedback }}</h2>
     <div class="CreatePage" v-else>
         <h3 v-if="feedback">{{ feedback }}</h3>
@@ -181,7 +179,7 @@ async function post() {
             </select>
         </div>
         <div class="PostElements">
-            <PostElementVue
+            <CreatePostElement
             v-for="(element, index) in postElements"
             :exercise="
                 allExercises.find((exercise) => {

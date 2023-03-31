@@ -1,6 +1,6 @@
 import { BaseResponse, BaseResponseBody } from "../classes/BaseResponse";
 import { ServerPostElement } from "../classes/model/ServerPostElement";
-import { Post, PostIDSchema, PostSchema } from "../classes/model/Post";
+import { Post, PostSchema } from "../classes/model/Post";
 import { Exercise } from "../classes/model/Exercise";
 import { Collection, Db, ObjectId, WithId } from "mongodb";
 import { HandlerEvent } from "@netlify/functions";
@@ -8,6 +8,7 @@ import AppDatabase from "../classes/AppDatabase";
 import AppResponse from "../classes/AppResponse";
 import TokenDTO from "../classes/dto/TokenDTO";
 import { JwtPayload } from "jsonwebtoken";
+import { PostIDSchema } from "../classes/model/PostID";
 
 type BodyPost = { title: string; content: Array<ServerPostElement> };
 
@@ -24,16 +25,25 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 			if (query.id) {
 				const { success } = PostIDSchema.safeParse(query.id);
 				if (!success) {
-					return AppResponse.InvalidPostID
+					return AppResponse.InvalidPostID;
 				}
 
 				const db: AppDatabase = await new AppDatabase().connect();
 				const collection: Collection<Required<Post>> =
 					db.collection("post");
 
-				const post: Required<Post> | null = await collection.findOne({
-					id: query.id,
-				});
+				const post: Required<Post> | null = await collection.findOne(
+					{
+						id: query.id,
+					},
+					{
+						projection: {
+							_id: false,
+							id: false,
+							userID: false,
+						},
+					}
+				);
 				await db.close();
 				if (!post) {
 					return AppResponse.BadRequest(
@@ -56,7 +66,12 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				const collection: Collection<Post> = db.collection("post");
 				const posts: Array<Post> = await collection
 					.find()
-					.sort({ timestamp: "desc", id: "asc" })
+					.project<Post>({
+						_id: false,
+						userID: false,
+						content: false,
+					})
+					.sort({ timestamp: "desc", title: "asc" })
 					.skip((page - 1) * PER_PAGE)
 					.limit(PER_PAGE)
 					.toArray();
@@ -153,7 +168,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 			const { success } = PostIDSchema.safeParse(postID);
 			if (!success) {
-				return AppResponse.InvalidPostID
+				return AppResponse.InvalidPostID;
 			}
 
 			const db: AppDatabase = await new AppDatabase().connect();
