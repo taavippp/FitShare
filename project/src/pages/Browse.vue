@@ -37,6 +37,7 @@ async function getContent() {
             feedback.value = `${data.message}!`
             return
         }
+        content.value = data.object!.post as Post
         fetched.value = true
         return
     }

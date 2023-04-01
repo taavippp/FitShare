@@ -1,0 +1,3 @@
+# 1. aprill
+## Ajakulu: 1h
+Täna kirjutasin testid kommentaaridele ja tõstsin *App.vue* failis oleva CSS'i eraldi faili *App.css*, kuna see võttis seal liiga palju ruumi ja ei tundunud enam viisakas seal seda hoida. Kui postituse näitamise lehe täielikult valmis saan, tahaks CSS'i poolele pilgu peale visata ja seda natuke inimlikumaks teha. Peale seda on treeningu läbiviimise leht vaja luua. See peaks põhimõtteliselt puhas *frontend* olema.
