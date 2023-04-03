@@ -1,0 +1,2 @@
+# 2. aprill
+Server tagastab nüüd postituse autori nime ka. Lisaks sain nii postituse leheküljed ilusti tööle. Pidin kasutama veidi ebaefektiivset lahendust *App.vue* failis, aga minu rakenduses ei peaks see probleeme põhjustama.

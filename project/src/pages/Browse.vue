@@ -9,6 +9,7 @@ import router from '../router';
 import { RouteParams } from 'vue-router';
 import BrowsePost from '../components/BrowsePost.vue';
 import { Post } from '../../classes/model/Post';
+import BrowsePage from '../components/BrowsePage.vue';
 
 const params: Ref<RouteParams> = ref(router.currentRoute.value.params)
 
@@ -23,6 +24,7 @@ const feedback: Ref<string> = ref("");
 const isOnePost: Ref<boolean> = ref(false);
 
 const content: Ref<Post | Array<Post> | undefined> = ref()
+const author: Ref<string> = ref("")
 
 async function getContent() {
     loading.value = true;
@@ -38,6 +40,7 @@ async function getContent() {
             return
         }
         content.value = data.object!.post as Post
+        author.value = data.object!.user as string
         fetched.value = true
         return
     }
@@ -54,17 +57,24 @@ async function getContent() {
         feedback.value = `${data.message}!`
         return
     }
+    content.value = data.object!.posts as Array<Post>
     fetched.value = true
 }
 </script>
 <template>
     <Loading v-if="loading" @vnode-before-mount="getContent"/>
     <h3 v-else-if="!loading && !fetched">{{ feedback }}</h3>
-    <BrowsePost
-        v-else
-        v-if="isOnePost"
-        :post="content as Post"
-    />
+    <div v-else>
+        <BrowsePost
+            v-if="isOnePost"
+            :author="author"
+            :post="content as Post"
+        />
+        <BrowsePage
+            v-else
+            :posts="content as Array<Post>"
+        />
+    </div>
 </template>
 <style scoped>
 </style>

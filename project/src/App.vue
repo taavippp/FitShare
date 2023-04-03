@@ -5,10 +5,13 @@ import { RouterView } from "vue-router"
 <template>
   <NavBar/>
   <div class="RouterView">
-    <RouterView/>
+    <!-- This would be problematic if URL updated many times per second. -->
+    <RouterView :key="$route.fullPath"/>
   </div>
 </template>
-<style src="./App.css">
+<!-- Global stylesheet. -->
+<style src="./App.css"/>
+<style>
 div.RouterView {
   margin-top: 5rem;
 }

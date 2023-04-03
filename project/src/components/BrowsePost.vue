@@ -4,11 +4,13 @@ import AppRequest from '../../classes/AppRequest';
 import { Post } from '../../classes/model/Post';
 import { BaseResponseBody } from '../../classes/BaseResponse';
 import Loading from './Loading.vue';
-import { Ref, ref, toRaw } from 'vue';
+import { Ref, ref } from 'vue';
 import { Exercise } from '../../classes/model/Exercise';
+import { paths } from '../router';
 
 const props = defineProps<{
-    post: Post
+    post: Post,
+    author: string,
 }>();
 
 const exerciseURL: string = "/api/exercise"
@@ -36,27 +38,74 @@ async function getExercises() {
 </script>
 <template>
     <h2>{{ props.post.title }}</h2>
-    <h4>Uploaded {{ new Date(props.post.timestamp!).toLocaleString() }}</h4>
+    <h4>Posted by
+        <!-- Dumb solution? -->
+        <div class="Author">
+            <RouterLink
+            :to="`${paths.account}/${author}`"
+            v-if="!author.includes(' ')"
+            >
+                {{ author }}
+            </RouterLink>
+            <div v-else>{{ author }}</div>
+        </div>
+        {{ new Date(props.post.timestamp!).toLocaleString() }}
+    </h4>
     <Loading v-if="!fetched && !feedback" @vnode-before-mount="getExercises"/>
     <h3 v-else-if="!fetched">{{ feedback }}</h3>
-    <table v-else>
-        <thead>
-            <th>Name</th>
-            <th>Sets</th>
-            <th>Reps</th>
-        </thead>
-        <tbody>
-            <tr v-for="(postExercise) in props.post.content">
-                <td>{{
-                exercises.find((exercise) => {
-                    return exercise.id === postExercise[0]
-                })!.name
-                }}</td>
-                <td>{{ postExercise[1] }}</td>
-                <td>{{ postExercise[2] }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div v-else class="Exercises">
+        <table>
+            <thead>
+                <th>Name</th>
+                <th>Sets</th>
+                <th>Reps</th>
+            </thead>
+            <tbody>
+                <tr v-for="(postExercise) in props.post.content">
+                    <td class="ExerciseName">{{
+                    exercises.find((exercise) => {
+                        return exercise.id === postExercise[0]
+                    })!.name
+                    }}</td>
+                    <td>{{ postExercise[1] }}</td>
+                    <td>{{ postExercise[2] }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 <style scoped>
+h4, a {
+    font-size: 1.25rem;
+}
+
+div.Author, div.Author * {
+    display: inline;
+}
+
+table {
+    font-size: 1.25rem;
+    border: 2px solid var(--color_border);
+}
+
+td, th {
+    padding-inline: .5rem;
+    border: 1px solid black;
+    text-align: center;
+}
+
+th {
+    border: none;
+}
+
+td.ExerciseName {
+    text-align: initial;
+}
+
+div.Exercises {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+}
 </style>

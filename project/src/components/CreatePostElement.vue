@@ -55,10 +55,16 @@ function onChange(event: Event) {
                 </option>
             </select>
             <div class="Buttons">
-                <button @click="setEditable(index)">
+                <button
+                @click="setEditable(index)"
+                title="Set if this is editable (affected by filter)"
+                >
                     <img src="/edit.png" alt="Edit exercise"/>
                 </button>
-                <button @click="removeElement(index)">
+                <button
+                @click="removeElement(index)"
+                title="Remove this exercise from the workout"
+                >
                     <img src="/delete.png" alt="Remove exercise"/>
                 </button>
             </div>

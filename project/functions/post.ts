@@ -9,6 +9,7 @@ import AppResponse from "../classes/AppResponse";
 import TokenDTO from "../classes/dto/TokenDTO";
 import { JwtPayload } from "jsonwebtoken";
 import { PostIDSchema } from "../classes/model/PostID";
+import { User } from "../classes/model/User";
 
 type BodyPost = { title: string; content: Array<ServerPostElement> };
 
@@ -40,19 +41,27 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 						projection: {
 							_id: false,
 							id: false,
-							userID: false,
 						},
 					}
 				);
-				await db.close();
 				if (!post) {
+					await db.close();
 					return AppResponse.BadRequest(
 						"Post with this ID doesn't exist"
 					);
 				}
 
+				const userCollection: Collection<User> = db.collection("user");
+				const user: User | null = await userCollection.findOne({
+					_id: post.userID,
+				});
+				await db.close();
+
 				return AppResponse.Success(
-					new BaseResponseBody("Found post", false, { post })
+					new BaseResponseBody("Found post", false, {
+						post,
+						user: user?.username || "DELETED USER",
+					})
 				);
 			}
 
