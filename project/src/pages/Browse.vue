@@ -14,9 +14,7 @@ import BrowsePage from '../components/BrowsePage.vue';
 const params: Ref<RouteParams> = ref(router.currentRoute.value.params)
 
 const postURL: string = "/api/post"
-const commentURL: string = "/api/comment"
 const postReq: AppRequest = new AppRequest(postURL)
-const commentReq: AppRequest = new AppRequest(commentURL)
 
 const fetched: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
@@ -25,6 +23,7 @@ const isOnePost: Ref<boolean> = ref(false);
 
 const content: Ref<Post | Array<Post> | undefined> = ref()
 const author: Ref<string> = ref("")
+const postID: Ref<string> = ref("")
 
 async function getContent() {
     loading.value = true;
@@ -40,6 +39,7 @@ async function getContent() {
             return
         }
         content.value = data.object!.post as Post
+        content.value.id = postID
         author.value = data.object!.user as string
         fetched.value = true
         return

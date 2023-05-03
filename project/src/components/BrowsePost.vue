@@ -4,9 +4,10 @@ import AppRequest from '../../classes/AppRequest';
 import { Post } from '../../classes/model/Post';
 import { BaseResponseBody } from '../../classes/BaseResponse';
 import Loading from './Loading.vue';
-import { Ref, ref } from 'vue';
+import { Ref, ref, toRaw } from 'vue';
 import { Exercise } from '../../classes/model/Exercise';
 import { paths } from '../router';
+import { ClientComment } from "../../classes/model/Comment"
 
 const props = defineProps<{
     post: Post,
@@ -15,13 +16,17 @@ const props = defineProps<{
 
 const exerciseURL: string = "/api/exercise"
 const exerciseReq: AppRequest = new AppRequest(exerciseURL)
+const commentURL: string = "/api/comment"
+const commentReq: AppRequest = new AppRequest(commentURL)
 
-const fetched: Ref<boolean> = ref(false)
+const postFetched: Ref<boolean> = ref(false)
+const loadingComments: Ref<boolean> = ref(false)
 const feedback: Ref<string> = ref("")
 const exercises: Ref<Array<Exercise>> = ref([])
+const comments: Ref<Array<ClientComment> | null> = ref(null)
 
 async function getExercises() {
-    fetched.value = false
+    postFetched.value = false
     const exerciseIDs: Set<number> = new Set()
     for (const exercise of props.post.content) {
         exerciseIDs.add(exercise[0])
@@ -33,8 +38,27 @@ async function getExercises() {
         return
     }
     exercises.value = data.object!.exercises as Array<Exercise>
-    fetched.value = true
+    postFetched.value = true
 }
+
+// TODO
+async function getComments() {
+    loadingComments.value = true
+    const res: AxiosResponse = await commentReq.get({ id: toRaw(props.post).id! })
+    const data: BaseResponseBody = res.data
+    loadingComments.value = false
+    if (data.error) {
+        feedback.value = data.message
+        return
+    }
+    comments.value = data.object!.comments as Array<ClientComment>
+}
+
+// TODO
+async function postComment() {
+
+}
+
 </script>
 <template>
     <h2>{{ props.post.title }}</h2>
@@ -43,7 +67,7 @@ async function getExercises() {
         <div class="Author">
             <RouterLink
             :to="`${paths.account}/${author}`"
-            v-if="!author.includes(' ')"
+            v-if="author !== 'DELETED USER'"
             >
                 {{ author }}
             </RouterLink>
@@ -51,10 +75,10 @@ async function getExercises() {
         </div>
         {{ new Date(props.post.timestamp!).toLocaleString() }}
     </h4>
-    <Loading v-if="!fetched && !feedback" @vnode-before-mount="getExercises"/>
-    <h3 v-else-if="!fetched">{{ feedback }}</h3>
+    <Loading v-if="!postFetched && !feedback" @vnode-before-mount="getExercises"/>
+    <h3 v-else-if="!postFetched">{{ feedback }}</h3>
     <div v-else class="Exercises">
-        <table>
+        <table class="ExercisesTable"> 
             <thead>
                 <th>Name</th>
                 <th>Sets</th>
@@ -72,6 +96,27 @@ async function getExercises() {
                 </tr>
             </tbody>
         </table>
+        <button class="CommentsButton" v-if="!loadingComments && !comments" @click="getComments">Load comments</button>
+        <div v-else class="CommentsSection">
+            <h3 v-if="!comments">{{ feedback }}</h3>
+            <h3 v-else>Comments</h3>
+            <table class="CommentsTable">
+                <div class="CommentForm">
+                    <label for="comment">Write a comment</label>
+                    <textarea id="comment" cols="30" rows="3"></textarea>
+                    <button>Submit</button>
+                </div>
+                <hr>
+                <p>{{ comments!.length }} comments</p>
+                <tbody>
+                    <tr v-for="(comment) in comments">
+                        <td>{{ comment.username }}</td>
+                        <td>{{ comment.text }}</td>
+                        <td>{{ new Date(comment.timestamp!).toLocaleString() }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 <style scoped>
@@ -83,9 +128,32 @@ div.Author, div.Author * {
     display: inline;
 }
 
+
 table {
     font-size: 1.25rem;
     border: 2px solid var(--color_border);
+}
+
+div.CommentsSection button.CommentsButton {
+    margin-top: 1rem;
+}
+
+table.ExercisesTable {
+    width: max-content;
+}
+
+table.CommentsTable {
+    padding: 1rem;
+}
+
+div.CommentForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+textarea {
+    resize: none;
 }
 
 td, th {
@@ -105,7 +173,8 @@ td.ExerciseName {
 div.Exercises {
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin-top: 3rem;
 }
 </style>
