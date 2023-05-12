@@ -1,0 +1,3 @@
+# 3. mai
+## Ajakulu: 1h
+Tegelesin kommentaaride funktsionaalsusega, aga praegu, kui kirjutan seda päevikut, on jälle olnud üle nädala aja vahet koodi kirjutamisega. Mul on selline idee, et teen GitHub'is eraldi *branch*'i, kus teen funktsionaalsuseid täiesti ümber, kuna mul on ideed, aga pooleliolevate asjadega peale nii pikka pausi on keeruline taas alustada. Aga projekti pean ma valmis saama ja oma vaimsest blokist edasi saama.

@@ -7,7 +7,8 @@ import Loading from './Loading.vue';
 import { Ref, ref, toRaw } from 'vue';
 import { Exercise } from '../../classes/model/Exercise';
 import { paths } from '../router';
-import { ClientComment } from "../../classes/model/Comment"
+import { ClientComment, ClientCommentSchema } from "../../classes/model/Comment"
+import CommentForm from './CommentForm.vue';
 
 const props = defineProps<{
     post: Post,
@@ -55,15 +56,15 @@ async function getComments() {
 }
 
 // TODO
-async function postComment() {
-
+async function postComment(text: string) {
+    ClientCommentSchema
+    const res: AxiosResponse = await commentReq.post()
 }
 
 </script>
 <template>
     <h2>{{ props.post.title }}</h2>
     <h4>Posted by
-        <!-- Dumb solution? -->
         <div class="Author">
             <RouterLink
             :to="`${paths.account}/${author}`"
@@ -101,11 +102,7 @@ async function postComment() {
             <h3 v-if="!comments">{{ feedback }}</h3>
             <h3 v-else>Comments</h3>
             <table class="CommentsTable">
-                <div class="CommentForm">
-                    <label for="comment">Write a comment</label>
-                    <textarea id="comment" cols="30" rows="3"></textarea>
-                    <button>Submit</button>
-                </div>
+                <CommentForm :submitComment="postComment"/>
                 <hr>
                 <p>{{ comments!.length }} comments</p>
                 <tbody>
