@@ -73,6 +73,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 
 				const db: AppDatabase = await new AppDatabase().connect();
 				const collection: Collection<Post> = db.collection("post");
+
 				const posts: Array<Post> = await collection
 					.find()
 					.project<Post>({
@@ -84,6 +85,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					.skip((page - 1) * PER_PAGE)
 					.limit(PER_PAGE)
 					.toArray();
+
 				await db.close();
 
 				return AppResponse.Success(

@@ -61,6 +61,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				)
 				.sort({ name: "asc" })
 				.toArray();
+
 			await db.close();
 			return AppResponse.Success(
 				new BaseResponseBody("Exercises by ID", false, {

@@ -10,7 +10,7 @@ const BaseCommentSchema = z.object({
 
 export const ServerCommentSchema = BaseCommentSchema.extend({
 	userID: z.custom<ObjectId>((userID) => {
-		return ObjectId.isValid(userID as string);
+		return Buffer.byteLength(userID as string, "utf8") === 12;
 	}),
 });
 

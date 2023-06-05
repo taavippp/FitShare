@@ -9,7 +9,7 @@ export const PostSchema = z.object({
 	content: z.array(ServerPostElementSchema).min(1).max(32),
 	userID: z
 		.custom<ObjectId>((userID) => {
-			return ObjectId.isValid(userID as string);
+			return Buffer.byteLength(userID as string, "utf8") === 12;
 		})
 		.optional(),
 	timestamp: z.number().default(Date.now()).optional(),

@@ -49,6 +49,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 				.find({ postID: query.id })
 				.sort({ timestamp: "asc" })
 				.toArray();
+			
 
 			const userIDs: Array<ObjectId> = serverComments.map((comment) => {
 				return comment.userID;
@@ -72,6 +73,7 @@ export async function handler(event: HandlerEvent): Promise<BaseResponse> {
 					};
 				}
 			);
+
 			return AppResponse.Success(
 				new BaseResponseBody(`Comments of ${query.id}`, false, {
 					comments,
